@@ -1,0 +1,92 @@
+[
+  {
+    "id": "PROG-001",
+    "name": "MindEase Therapy Sessions",
+    "category": "mental_health",
+    "provider": "MindEase Wellness",
+    "capacity": 60,
+    "enrolledCount": 47,
+    "costPerEmployeeINR": 22000
+  },
+  {
+    "id": "PROG-002",
+    "name": "CultFit Corporate Membership",
+    "category": "fitness",
+    "provider": "CultFit",
+    "capacity": 100,
+    "enrolledCount": 88,
+    "costPerEmployeeINR": 18000
+  },
+  {
+    "id": "PROG-003",
+    "name": "NutriWell Diet Coaching",
+    "category": "nutrition",
+    "provider": "NutriWell",
+    "capacity": 40,
+    "enrolledCount": 22,
+    "costPerEmployeeINR": 12000
+  },
+  {
+    "id": "PROG-004",
+    "name": "FinWise Retirement Planning",
+    "category": "financial_wellness",
+    "provider": "FinWise Advisors",
+    "capacity": 50,
+    "enrolledCount": 19,
+    "costPerEmployeeINR": 9000
+  },
+  {
+    "id": "PROG-005",
+    "name": "Mindful Mornings Meditation",
+    "category": "mental_health",
+    "provider": "MindEase Wellness",
+    "capacity": 80,
+    "enrolledCount": 61,
+    "costPerEmployeeINR": 6000
+  },
+  {
+    "id": "PROG-006",
+    "name": "Yoga & Flexibility Circuit",
+    "category": "fitness",
+    "provider": "FlexFit Studios",
+    "capacity": 45,
+    "enrolledCount": 45,
+    "costPerEmployeeINR": 10000
+  },
+  {
+    "id": "PROG-007",
+    "name": "New Parent Support Circle",
+    "category": "mental_health",
+    "provider": "MindEase Wellness",
+    "capacity": 25,
+    "enrolledCount": 11,
+    "costPerEmployeeINR": 15000
+  },
+  {
+    "id": "PROG-008",
+    "name": "Budgeting & Debt Clinic",
+    "category": "financial_wellness",
+    "provider": "FinWise Advisors",
+    "capacity": 35,
+    "enrolledCount": 14,
+    "costPerEmployeeINR": 7000
+  },
+  {
+    "id": "PROG-009",
+    "name": "Ergonomics & Desk Health",
+    "category": "fitness",
+    "provider": "CultFit",
+    "capacity": 100,
+    "enrolledCount": 52,
+    "costPerEmployeeINR": 4000
+  },
+  {
+    "id": "PROG-010",
+    "name": "Nutrition for Night Shifts",
+    "category": "nutrition",
+    "provider": "NutriWell",
+    "capacity": 30,
+    "enrolledCount": 8,
+    "costPerEmployeeINR": 12000
+  }
+]

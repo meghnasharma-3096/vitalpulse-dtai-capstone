@@ -1,0 +1,338 @@
+[
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.4,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.41,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.42,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.38,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.41,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-ENG",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.41,
+    "trend": "stable",
+    "headcount": 18
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.41,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.45,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.51,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.55,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.55,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-SALES",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.6,
+    "trend": "worsening",
+    "headcount": 22
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.54,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.6,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.62,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.68,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.74,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-CS",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.79,
+    "trend": "worsening",
+    "headcount": 15
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.58,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.52,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.49,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.44,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.39,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-MKT",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.35,
+    "trend": "improving",
+    "headcount": 10
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.29,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.26,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.29,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.29,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.27,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-OPS",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.29,
+    "trend": "stable",
+    "headcount": 14
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.23,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.23,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.23,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.22,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.22,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-FIN",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.21,
+    "trend": "stable",
+    "headcount": 8
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.42,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.39,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.4,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.41,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.45,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-HR",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.44,
+    "trend": "stable",
+    "headcount": 6
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-07-13",
+    "riskScore": 0.34,
+    "trend": "improving",
+    "headcount": 7
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-07-20",
+    "riskScore": 0.35,
+    "trend": "improving",
+    "headcount": 7
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-07-27",
+    "riskScore": 0.3,
+    "trend": "improving",
+    "headcount": 7
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-08-03",
+    "riskScore": 0.28,
+    "trend": "improving",
+    "headcount": 7
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-08-10",
+    "riskScore": 0.26,
+    "trend": "improving",
+    "headcount": 7
+  },
+  {
+    "departmentId": "DEPT-PROD",
+    "weekOf": "2026-08-17",
+    "riskScore": 0.24,
+    "trend": "improving",
+    "headcount": 7
+  }
+]
