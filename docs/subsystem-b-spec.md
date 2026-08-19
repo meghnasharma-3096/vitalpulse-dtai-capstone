@@ -42,7 +42,7 @@ You also **add** `disengagementRiskScore` to each record in `employees.json` (al
 ## 2b. What the other two subsystems do (so your feature fits into the whole)
 
 - **Subsystem A (Matching)** recommends wellness programs and reads your disengagement risk score as part of its conflict rule — a high-risk employee shouldn't get pushed a new-program nudge. Make sure `disengagementRiskScore` is readable and meaningfully populated (not always 0) so their rule has something real to check against.
-- **Subsystem C (Burnout Radar)** works at the department level, not individual — related conceptually (both are "risk" signals) but operates on separate data. The unified employee profile page pulls a summary from both your subsystem and theirs, so keep your data shape predictable for whoever builds that combined view.
+- **Subsystem C (Burnout Radar)** works at the department level, not individual — related conceptually (both are "risk" signals) but operates on separate data. **Its flag is always department-level** (`burnout-snapshots.json` has a `departmentId`, never an employee ID — this is a deliberate privacy-floor design, not an oversight). The unified employee profile page pulls a summary from both your subsystem and theirs, so keep your data shape predictable for whoever builds that combined view.
 
 ---
 
@@ -64,9 +64,12 @@ You also **add** `disengagementRiskScore` to each record in `employees.json` (al
 - **Nudge fatigue:** an employee who's dismissed several nudges in a row should get fewer nudges or a different approach next time, not endless repetition — a simple rule (e.g. skip nudging for N cycles after 2+ dismissals) is enough, doesn't need real ML
 - **Feedback loop:** a "not helpful" action on a nudge is logged in `feedback`, and referenced (even just narratively/in a tooltip: "this employee marked similar nudges unhelpful before") the next time a nudge is generated for that person
 - **ROI calculator edge inputs:** check the number stays sane at the extremes — zero engagement, 100% engagement — don't let it go negative or break
-- **Conflict rule enforcement:** if an employee is currently flagged high-risk by Subsystem C's burnout radar, don't send them a "new program" style nudge — a lighter check-in nudge is fine, but not a push toward more commitment
+- **Conflict rule enforcement:** two separate checks feed this, don't conflate them — (1) your own subsystem's `disengagementRiskScore` on the employee, and (2) whether the employee's *department* is currently flagged by Subsystem C's burnout radar (`isDepartmentFlaggedHighRisk(departmentId)` — look up the employee's `departmentId` and check that, never an individual employee-level burnout flag, since Subsystem C never produces one). If either is true, don't send a "new program" style nudge — a lighter check-in nudge is fine, but not a push toward more commitment. Since Subsystem C may not be merged yet when you build this, stub the department-flag check (see note below) rather than blocking on it.
 - **Opted-out employee:** zero nudges, zero risk scoring shown, anywhere — verify this explicitly
 - **Budget-aware note:** the ROI calculator should reflect that recommended interventions aren't unlimited — tie back to each department's budget figures where relevant, so the number isn't just abstract
+
+### Building before Subsystem C exists
+Since Subsystem C's real burnout-radar data may not be merged yet when you get to the conflict rule, stub a fake `isDepartmentFlaggedHighRisk(departmentId): boolean` in `lib/data.ts` (clearly marked temporary, with a TODO comment), hardcoded to return true for 1-2 seeded department IDs — don't have it read from a file. Keep the signature (`departmentId` in, boolean out) identical to what Subsystem C's real implementation will need, so swapping the stub body for the real read later doesn't require touching any call sites.
 
 ### UI/UX spec
 Follow `design.md`: primary color `#2D6A4F`, risk colors `#52B788`/`#F4A261`/`#E63946` for low/medium/high disengagement risk — reuse the exact same color mapping Subsystem C uses for burnout risk, so risk means the same thing visually everywhere in the app. Inter font. shadcn/ui `Card`, `Badge`, `Slider` or `Input` (for the ROI calculator's adjustable assumptions), `Table`. The ROI number itself should be the largest, most visually prominent element on its screen — it's your headline moment.
@@ -78,7 +81,7 @@ Follow `design.md`: primary color `#2D6A4F`, risk colors `#52B788`/`#F4A261`/`#E
 1. Cut the nudge-fatigue rule's sophistication (a flat "don't nudge more than once every N days" is fine if you don't have time for anything smarter)
 2. Cut budget-tie-in polish on the ROI calculator (keep the core adjustable-assumption calculator, drop the department-budget cross-reference if pressed)
 3. **Do not cut:** the live, adjustable ROI calculator itself — it's your single highest-value screen
-4. **Do not cut:** the conflict rule (no new-program nudges to flagged employees) and opted-out enforcement — governance features the rubric rewards
+4. **Do not cut:** the conflict rule (no new-program nudges to flagged employees/departments) and opted-out enforcement — governance features the rubric rewards
 
 ---
 
