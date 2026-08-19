@@ -1,0 +1,212 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+
+interface DemoAccount {
+  id: string;
+  email: string;
+  name: string;
+  role: "cfo" | "hr_admin" | "dept_manager" | "employee";
+  departmentId: string | null;
+  departmentName: string | null;
+}
+
+const PERSONA_LABEL: Record<string, string> = {
+  "CRED-EMP-NEWPARENT": "New parent",
+  "CRED-EMP-HIGHPERF": "High performer, disengaging",
+  "CRED-EMP-ATRISK": "At-risk / flagged",
+  "CRED-EMP-STANDARD": "Standard / baseline",
+  "CRED-EMP-OPTEDOUT": "Opted out",
+};
+
+const DEMO_PASSWORD = "Demo@2026";
+
+export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  async function loginWith(payload: { credentialId: string } | { email: string; password: string }) {
+    setError(null);
+    setLoadingId("credentialId" in payload ? payload.credentialId : "manual");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setError(data.error || "Login failed.");
+        setLoadingId(null);
+        return;
+      }
+      router.push(data.redirectTo);
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoadingId(null);
+    }
+  }
+
+  const cfo = accounts.find(a => a.role === "cfo");
+  const hrAdmin = accounts.find(a => a.role === "hr_admin");
+  const deptManagers = accounts.filter(a => a.role === "dept_manager");
+  const employees = accounts.filter(a => a.role === "employee");
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <RoleCard title="CFO / Exec" description="Company-wide rollup, no operational detail">
+          {cfo && (
+            <QuickLoginButton account={cfo} label={`Log in as CFO — ${cfo.name}`} loading={loadingId === cfo.id} onClick={() => loginWith({ credentialId: cfo.id })} />
+          )}
+        </RoleCard>
+
+        <RoleCard title="HR Admin" description="Full company-wide access across all three subsystems">
+          {hrAdmin && (
+            <QuickLoginButton account={hrAdmin} label={`Log in as HR Admin — ${hrAdmin.name}`} loading={loadingId === hrAdmin.id} onClick={() => loginWith({ credentialId: hrAdmin.id })} />
+          )}
+        </RoleCard>
+
+        <RoleCard title="Department Manager" description="Same views as HR Admin, scoped to one department">
+          <div className="flex flex-col gap-2">
+            {deptManagers.map(a => (
+              <QuickLoginButton
+                key={a.id}
+                account={a}
+                label={`${a.name} — ${a.departmentName}`}
+                loading={loadingId === a.id}
+                onClick={() => loginWith({ credentialId: a.id })}
+              />
+            ))}
+          </div>
+        </RoleCard>
+
+        <RoleCard title="Employee" description="Sees only their own matches, nudges, and profile">
+          <div className="flex flex-col gap-2">
+            {employees.map(a => (
+              <QuickLoginButton
+                key={a.id}
+                account={a}
+                label={`${a.name}`}
+                sublabel={PERSONA_LABEL[a.id]}
+                loading={loadingId === a.id}
+                onClick={() => loginWith({ credentialId: a.id })}
+              />
+            ))}
+          </div>
+        </RoleCard>
+      </div>
+
+      {error && <p className="text-sm text-[#E63946] text-center">{error}</p>}
+
+      <Card className="bg-muted/40">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            Demo credentials <Badge variant="outline">For demo/grading purposes</Badge>
+          </CardTitle>
+          <CardDescription>Every seeded account shares the password below — use them with the manual sign-in form if you&apos;d rather not use the one-click buttons.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-xs font-mono bg-background rounded-md border p-3 overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-muted-foreground">
+                  <th className="pr-4 py-1">Email</th>
+                  <th className="pr-4 py-1">Role</th>
+                  <th className="py-1">Password</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accounts.map(a => (
+                  <tr key={a.id} className="border-t">
+                    <td className="pr-4 py-1">{a.email}</td>
+                    <td className="pr-4 py-1">{a.role}{a.departmentName ? ` (${a.departmentName})` : ""}</td>
+                    <td className="py-1">{DEMO_PASSWORD}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <button type="button" className="text-xs text-[#2D6A4F] underline underline-offset-2" onClick={() => setManualOpen(o => !o)}>
+            {manualOpen ? "Hide manual sign-in" : "Sign in manually with email + password"}
+          </button>
+
+          {manualOpen && (
+            <form
+              className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end"
+              onSubmit={e => {
+                e.preventDefault();
+                loginWith({ email, password });
+              }}
+            >
+              <div className="space-y-1">
+                <Label htmlFor="email" className="text-xs">Email</Label>
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hradmin@meridiananalytics.com" required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="password" className="text-xs">Password</Label>
+                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={DEMO_PASSWORD} required />
+              </div>
+              <Button type="submit" disabled={loadingId === "manual"}>
+                {loadingId === "manual" ? "Signing in…" : "Sign in"}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function RoleCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function QuickLoginButton({
+  label,
+  sublabel,
+  loading,
+  onClick,
+}: {
+  account: DemoAccount;
+  label: string;
+  sublabel?: string;
+  loading: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full justify-between h-auto py-2 border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/5 hover:text-[#2D6A4F]"
+      onClick={onClick}
+      disabled={loading}
+    >
+      <span className="text-left">
+        <span className="block text-sm font-medium">{label}</span>
+        {sublabel && <span className="block text-xs text-muted-foreground">{sublabel}</span>}
+      </span>
+      {loading && <span className="text-xs text-muted-foreground">Signing in…</span>}
+    </Button>
+  );
+}

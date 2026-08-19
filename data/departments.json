@@ -1,0 +1,74 @@
+[
+  {
+    "id": "DEPT-ENG",
+    "name": "Engineering",
+    "managerId": "EMP-0001",
+    "headcount": 18,
+    "budgetAllocatedINR": 900000,
+    "budgetUsedINR": 860000
+  },
+  {
+    "id": "DEPT-SALES",
+    "name": "Sales",
+    "managerId": "EMP-0019",
+    "headcount": 22,
+    "budgetAllocatedINR": 700000,
+    "budgetUsedINR": 668000
+  },
+  {
+    "id": "DEPT-CS",
+    "name": "Customer Success",
+    "managerId": "EMP-0041",
+    "headcount": 15,
+    "budgetAllocatedINR": 520000,
+    "budgetUsedINR": 497000
+  },
+  {
+    "id": "DEPT-MKT",
+    "name": "Marketing",
+    "managerId": "EMP-0056",
+    "headcount": 10,
+    "budgetAllocatedINR": 380000,
+    "budgetUsedINR": 355000
+  },
+  {
+    "id": "DEPT-OPS",
+    "name": "Operations",
+    "managerId": "EMP-0066",
+    "headcount": 14,
+    "budgetAllocatedINR": 460000,
+    "budgetUsedINR": 430000
+  },
+  {
+    "id": "DEPT-FIN",
+    "name": "Finance",
+    "managerId": "EMP-0080",
+    "headcount": 8,
+    "budgetAllocatedINR": 300000,
+    "budgetUsedINR": 275000
+  },
+  {
+    "id": "DEPT-HR",
+    "name": "HR",
+    "managerId": "EMP-0088",
+    "headcount": 6,
+    "budgetAllocatedINR": 240000,
+    "budgetUsedINR": 215000
+  },
+  {
+    "id": "DEPT-PROD",
+    "name": "Product",
+    "managerId": "EMP-0094",
+    "headcount": 7,
+    "budgetAllocatedINR": 260000,
+    "budgetUsedINR": 240000
+  },
+  {
+    "id": "DEPT-DESIGN",
+    "name": "Design",
+    "managerId": "EMP-0101",
+    "headcount": 3,
+    "budgetAllocatedINR": 120000,
+    "budgetUsedINR": 54000
+  }
+]
