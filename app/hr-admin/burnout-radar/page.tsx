@@ -1,4 +1,5 @@
 import { Radar, ShieldAlert, ScrollText } from "lucide-react";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getBurnoutSnapshots, getInterventions, getAllDepartmentsUnscoped, PRIVACY_FLOOR_HEADCOUNT } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,6 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export default async function BurnoutRadarPage() {
   const user = await getCurrentUser();
+  if (!user || user.role !== "hr_admin") {
+    redirect("/login");
+  }
+
   const snapshots = getBurnoutSnapshots(user);
   const interventions = getInterventions(user);
   const departments = getAllDepartmentsUnscoped();
@@ -28,9 +33,9 @@ export default async function BurnoutRadarPage() {
             <Radar className="size-6 text-primary" />
             Burnout Radar
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor — full intervention workflow is owned by Subsystem C, built separately.</p>
+          <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor — the full intervention workflow is built separately.</p>
         </div>
-        <Badge variant="outline">Subsystem C — not yet built in this workspace</Badge>
+        <Badge variant="outline">Not yet built in this workspace</Badge>
       </div>
 
       {suppressedDepartments.length > 0 && (
