@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { Users2, Wallet, ShieldAlert, TriangleAlert, Info } from "lucide-react";
+import { Users2, Wallet, ShieldAlert, TriangleAlert, Info, HeartPulse } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getDepartments, getBurnoutSnapshots } from "@/lib/data";
 import { getAtRiskEmployees, getDisengagementDistribution } from "@/lib/subsystem-b";
+import { getProgramCatalogForDepartment } from "@/lib/subsystem-a";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DisengagementDistributionChart } from "@/components/subsystem-b/disengagement-distribution-chart";
 import { AtRiskEmployeeTable } from "@/components/subsystem-b/at-risk-employee-table";
 import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
+import { ProgramCatalog } from "@/components/subsystem-a/program-catalog";
+import { ProgramUtilizationChart } from "@/components/subsystem-a/program-utilization-chart";
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 
@@ -18,6 +21,7 @@ export default async function DeptManagerDashboardPage() {
   const distribution = getDisengagementDistribution(user);
   const snapshots = getBurnoutSnapshots(user).sort((a, b) => (a.weekOf < b.weekOf ? 1 : -1));
   const latestSnapshot = snapshots[0];
+  const programs = getProgramCatalogForDepartment(user);
 
   if (!dept) {
     return <p className="text-sm text-muted-foreground">No department scope found for this account.</p>;
@@ -75,6 +79,29 @@ export default async function DeptManagerDashboardPage() {
           At-risk employees in your department
         </h2>
         <AtRiskEmployeeTable employees={atRisk} departments={[{ id: dept.id, name: dept.name }]} />
+      </div>
+
+      <div>
+        <h2 className="flex items-center gap-2 text-lg font-semibold mb-1">
+          <HeartPulse className="size-4 text-primary" />
+          Wellness programs — Subsystem A
+        </h2>
+        <p className="text-sm text-muted-foreground mb-3">
+          Same catalog HR Admin sees. Capacity and enrollment are company-wide (there&apos;s no per-department
+          enrollment data to filter), but &quot;recommended to&quot; and the underutilization signal below are scoped
+          to {dept.name}&apos;s own employees only.
+        </p>
+        <div className="space-y-4">
+          <ProgramCatalog programs={programs} />
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Enrollment vs. Capacity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProgramUtilizationChart programs={programs} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <Card>
