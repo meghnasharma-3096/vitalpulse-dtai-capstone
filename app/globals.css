@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/*
+ * No dark mode (design.md Section 1) — this app never applies a `.dark` class,
+ * so re-scoping the `dark:` variant to it (instead of Tailwind's default
+ * prefers-color-scheme media query) keeps every stray `dark:` utility class
+ * already baked into shadcn's generated components permanently inert, rather
+ * than having them spring to life on a user's OS dark-mode preference.
+ */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -35,6 +42,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-tint: var(--primary-tint);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -45,85 +53,58 @@
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-xl: 0.75rem;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Design tokens per design.md — single light theme, no dark mode.
+ * Cards use --shadow-card instead of a border; see components/ui/card.tsx.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --background: #F7F9F6;
+  --foreground: #1B1F1D;
+  --card: #FFFFFF;
+  --card-foreground: #1B1F1D;
+  --popover: #FFFFFF;
+  --popover-foreground: #1B1F1D;
   --primary: #2D6A4F;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --primary-tint: #E8F3EE;
+  --secondary: oklch(0.97 0.005 155);
   --secondary-foreground: #1B4332;
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.48 0.02 155);
+  --muted: oklch(0.97 0.005 155);
+  --muted-foreground: #5B655F;
   --accent: #F4A261;
-  --accent-foreground: #1B4332;
+  --accent-foreground: #1B1F1D;
   --destructive: #E63946;
-  --border: oklch(0.9 0.01 155);
-  --input: oklch(0.9 0.01 155);
+  --border: #E3E8E4;
+  --input: #E3E8E4;
   --ring: #2D6A4F;
   --chart-1: #2D6A4F;
   --chart-2: #F4A261;
   --chart-3: #52B788;
   --chart-4: #E63946;
   --chart-5: oklch(0.556 0 0);
-  --radius: 0.625rem;
+  --chart-grid: #E5E9E6;
+  --radius: 0.5rem;
   --risk-low: #52B788;
   --risk-medium: #F4A261;
   --risk-high: #E63946;
-  --sidebar: #F7F5F0;
+  --shadow-card: 0 1px 3px rgba(45, 106, 79, 0.08), 0 8px 24px rgba(45, 106, 79, 0.06);
+  --shadow-card-hover: 0 2px 6px rgba(45, 106, 79, 0.1), 0 12px 32px rgba(45, 106, 79, 0.1);
+  /* Soft primary-teal glow for non-card interactive elements (buttons, nav items, pills) on hover/focus. */
+  --shadow-glow: 0 0 0 3px rgba(45, 106, 79, 0.12), 0 4px 14px rgba(45, 106, 79, 0.14);
+  --sidebar: #F7F9F6;
   --sidebar-foreground: #1B4332;
   --sidebar-primary: #2D6A4F;
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.94 0.02 150);
+  --sidebar-accent: #E8F3EE;
   --sidebar-accent-foreground: #1B4332;
-  --sidebar-border: oklch(0.9 0.01 155);
+  --sidebar-border: #E3E8E4;
   --sidebar-ring: #2D6A4F;
-}
-
-.dark {
-  --background: oklch(0.16 0.01 155);
-  --foreground: oklch(0.96 0 0);
-  --card: oklch(0.2 0.01 155);
-  --card-foreground: oklch(0.96 0 0);
-  --popover: oklch(0.2 0.01 155);
-  --popover-foreground: oklch(0.96 0 0);
-  --primary: #52B788;
-  --primary-foreground: #0F2A1D;
-  --secondary: oklch(0.27 0.01 155);
-  --secondary-foreground: oklch(0.96 0 0);
-  --muted: oklch(0.27 0.01 155);
-  --muted-foreground: oklch(0.7 0.01 155);
-  --accent: #F4A261;
-  --accent-foreground: #1B4332;
-  --destructive: #E63946;
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: #52B788;
-  --chart-1: #52B788;
-  --chart-2: #F4A261;
-  --chart-3: #2D6A4F;
-  --chart-4: #E63946;
-  --chart-5: oklch(0.7 0 0);
-  --risk-low: #52B788;
-  --risk-medium: #F4A261;
-  --risk-high: #E63946;
-  --sidebar: oklch(0.19 0.01 155);
-  --sidebar-foreground: oklch(0.96 0 0);
-  --sidebar-primary: #52B788;
-  --sidebar-primary-foreground: #0F2A1D;
-  --sidebar-accent: oklch(0.27 0.01 155);
-  --sidebar-accent-foreground: oklch(0.96 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: #52B788;
 }
 
 @layer base {

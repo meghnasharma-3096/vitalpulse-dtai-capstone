@@ -1,8 +1,10 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ExplainabilityTooltip } from "@/components/shared/explainability-tooltip";
+import { PulseDot } from "@/components/shared/pulse-dot";
 import type { AiVsWithoutComparison } from "@/lib/subsystem-b";
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0, notation: "compact" });
@@ -15,25 +17,31 @@ export function AiVsWithoutChart({ comparison }: { comparison: AiVsWithoutCompar
   ];
 
   return (
-    <Card className="border-[#2D6A4F]/30">
+    <Card className="shadow-[var(--shadow-card-hover)]">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle>Projected annual cost: with VitalPulse vs. without</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="size-4 text-primary" />
+            Projected annual cost: with VitalPulse vs. without
+          </CardTitle>
           <ExplainabilityTooltip reason={`Based on ${comparison.atRiskCount} currently at-risk employees, standard claims/absenteeism/attrition cost factors, and a 35% baseline engagement rate once nudges and programs are active.`} />
         </div>
         <CardDescription>The single clearest business-impact number for Finance</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <span className="text-4xl font-semibold text-[#2D6A4F] dark:text-[#52B788] tabular-nums">
-            {inrFull.format(Math.round(comparison.projectedSavingsINR))}
-          </span>
-          <span className="text-sm text-muted-foreground ml-2">projected annual savings</span>
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="flex items-center gap-2.5">
+            <PulseDot className="h-3 w-3 text-primary" />
+            <span className="text-[52px] font-bold leading-none text-primary tabular-nums">
+              {inrFull.format(Math.round(comparison.projectedSavingsINR))}
+            </span>
+          </div>
+          <span className="text-sm text-muted-foreground">projected annual savings</span>
         </div>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical" margin={{ left: 24, right: 32 }}>
-              <CartesianGrid horizontal={false} strokeDasharray="3 3" opacity={0.3} />
+              <CartesianGrid horizontal vertical={false} stroke="var(--chart-grid)" />
               <XAxis type="number" tickFormatter={v => inr.format(v)} tick={{ fontSize: 12 }} />
               <YAxis type="category" dataKey="scenario" width={140} tick={{ fontSize: 13 }} />
               <Bar dataKey="projectedCostINR" radius={[0, 6, 6, 0]}>

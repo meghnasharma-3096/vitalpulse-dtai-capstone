@@ -47,7 +47,7 @@ export function EmployeeDirectoryTable({ employees, departments }: { employees: 
         <span className="text-xs text-muted-foreground self-center">{filtered.length} of {employees.length} employees</span>
       </div>
 
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-xl overflow-x-auto bg-card shadow-[var(--shadow-card)]">
         <Table>
           <TableHeader>
             <TableRow>

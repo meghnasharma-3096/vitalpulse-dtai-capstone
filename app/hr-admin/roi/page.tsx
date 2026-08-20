@@ -1,3 +1,4 @@
+import { Calculator, TriangleAlert } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getDepartments } from "@/lib/data";
 import { getAtRiskEmployees, getRoiContext } from "@/lib/subsystem-b";
@@ -13,7 +14,10 @@ export default async function RoiPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1B4332] dark:text-[#B7EFC5]">ROI Calculator</h1>
+        <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
+          <Calculator className="size-6 text-primary" />
+          ROI Calculator
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Adjust the assumptions below to see the projected business case for VitalPulse&apos;s disengagement program update live.
         </p>
@@ -22,7 +26,10 @@ export default async function RoiPage() {
       <RoiCalculator context={context} />
 
       <div>
-        <h2 className="text-lg font-semibold mb-3">Company-wide at-risk employees</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
+          <TriangleAlert className="size-4 text-primary" />
+          Company-wide at-risk employees
+        </h2>
         <AtRiskEmployeeTable employees={atRisk} departments={departments} />
       </div>
     </div>

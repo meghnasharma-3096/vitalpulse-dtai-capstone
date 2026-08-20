@@ -1,3 +1,4 @@
+import { LayoutDashboard } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getAiVsWithoutComparison, getDisengagementDistribution, getNudgeEngagementTrend } from "@/lib/subsystem-b";
 import { AiVsWithoutChart } from "@/components/subsystem-b/ai-vs-without-chart";
@@ -13,7 +14,10 @@ export default async function CfoDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1B4332] dark:text-[#B7EFC5]">Executive Dashboard</h1>
+        <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
+          <LayoutDashboard className="size-6 text-primary" />
+          Executive Dashboard
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">Company-wide rollup — Meridian Analytics Pvt. Ltd.</p>
       </div>
 

@@ -13,7 +13,7 @@ export function ExplainabilityTooltip({ reason }: { reason: string }) {
       <TooltipTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[#2D6A4F] transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
           aria-label="Why am I seeing this?"
         >
           <Info className="h-3.5 w-3.5" />

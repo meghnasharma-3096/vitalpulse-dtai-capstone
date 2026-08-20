@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Calculator, SlidersHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
@@ -22,20 +23,23 @@ export function RoiCalculator({ context }: { context: RoiContext }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-      <Card className="border-[#2D6A4F]/30">
+      <Card className="shadow-[var(--shadow-card-hover)]">
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
-            <CardTitle>Projected annual savings</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="size-4 text-primary" />
+              Projected annual savings
+            </CardTitle>
             <ExplainabilityTooltip reason="Calculated from your currently at-risk employee count, the engagement rate you set below, and standard claims/absenteeism/attrition cost-avoidance factors. Adjust any assumption to see it update live." />
           </div>
           <CardDescription>{context.atRiskEmployeeCount} employees currently at medium/high disengagement risk</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <div className="text-5xl font-semibold tracking-tight text-[#2D6A4F] dark:text-[#52B788] tabular-nums">
+            <div className="text-[52px] font-bold leading-none tracking-tight text-primary tabular-nums">
               {inr.format(Math.round(result.totalSavingsINR))}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-2">
               Net of program cost: <span className="font-medium text-foreground">{inr.format(Math.round(result.netSavingsINR))}</span>
               {" · "}
               ROI multiple: <span className="font-medium text-foreground">{result.roiMultiple.toFixed(1)}×</span>
@@ -43,7 +47,7 @@ export function RoiCalculator({ context }: { context: RoiContext }) {
           </div>
 
           {result.exceedsBudget && (
-            <div className="rounded-md border border-[#E63946]/40 bg-[#E63946]/10 px-3 py-2 text-sm text-[#7A1620] dark:text-[#F8C1C6]">
+            <div className="rounded-xl bg-[color-mix(in_oklch,var(--risk-high)_10%,transparent)] px-3 py-2 text-sm text-[#7A1620]">
               This engagement level costs {inr.format(Math.round(result.programCostINR))}, exceeding the remaining wellness
               budget for affected departments by <span className="font-semibold">{inr.format(Math.round(result.budgetOverrunINR))}</span>.
               Recommend a phased rollout rather than enrolling everyone at once.
@@ -65,7 +69,10 @@ export function RoiCalculator({ context }: { context: RoiContext }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Adjustable assumptions</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SlidersHorizontal className="size-4 text-primary" />
+            Adjustable assumptions
+          </CardTitle>
           <CardDescription>Change any input and watch the number update live.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -114,7 +121,7 @@ export function RoiCalculator({ context }: { context: RoiContext }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border p-2.5">
+    <div className="rounded-lg border border-border p-2.5">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="font-medium tabular-nums">{value}</div>
     </div>

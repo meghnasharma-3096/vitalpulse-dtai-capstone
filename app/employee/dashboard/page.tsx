@@ -1,3 +1,4 @@
+import { Activity, Bell } from "lucide-react";
 import { getCurrentUser, getEmployeeRecordForUser } from "@/lib/auth-server";
 import { getNudgesForEmployee, isDepartmentFlaggedHighRisk } from "@/lib/data";
 import { explainNudge } from "@/lib/subsystem-b";
@@ -36,13 +37,16 @@ export default async function EmployeeDashboardPage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1B4332] dark:text-[#B7EFC5]">Welcome back, {employee.name.split(" ")[0]}</h1>
+        <h1 className="text-3xl font-semibold text-foreground">Welcome back, {employee.name.split(" ")[0]}</h1>
         <p className="text-sm text-muted-foreground mt-1">{employee.roleTitle}</p>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Your engagement snapshot</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Activity className="size-4 text-primary" />
+            Your engagement snapshot
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-4 flex-wrap">
           <RiskBadge level={riskLevel} score={employee.disengagementRiskScore} label={`Disengagement: ${riskLevel}`} />
@@ -56,7 +60,10 @@ export default async function EmployeeDashboardPage() {
       </Card>
 
       <div>
-        <h2 className="text-lg font-semibold mb-3">Your nudges</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
+          <Bell className="size-4 text-primary" />
+          Your nudges
+        </h2>
         {nudges.length === 0 ? (
           <p className="text-sm text-muted-foreground">No nudges yet — check back soon.</p>
         ) : (

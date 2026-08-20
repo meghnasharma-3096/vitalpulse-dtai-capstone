@@ -1,3 +1,4 @@
+import { Radar, ShieldAlert, ScrollText } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getBurnoutSnapshots, getInterventions, getAllDepartmentsUnscoped, PRIVACY_FLOOR_HEADCOUNT } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,18 +24,24 @@ export default async function BurnoutRadarPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1B4332] dark:text-[#B7EFC5]">Burnout Radar</h1>
+          <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
+            <Radar className="size-6 text-primary" />
+            Burnout Radar
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor — full intervention workflow is owned by Subsystem C, built separately.</p>
         </div>
         <Badge variant="outline">Subsystem C — not yet built in this workspace</Badge>
       </div>
 
       {suppressedDepartments.length > 0 && (
-        <Card className="border-dashed">
-          <CardContent className="pt-4 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Privacy floor enforced:</span>{" "}
-            {suppressedDepartments.map(d => `${d.name} (${d.headcount})`).join(", ")} — no snapshot is generated or
-            displayed for any department under {PRIVACY_FLOOR_HEADCOUNT} people.
+        <Card className="bg-primary-tint">
+          <CardContent className="pt-4 text-sm text-muted-foreground flex items-start gap-2.5">
+            <ShieldAlert className="size-4 text-primary mt-0.5 shrink-0" />
+            <p>
+              <span className="font-medium text-foreground">Privacy floor enforced:</span>{" "}
+              {suppressedDepartments.map(d => `${d.name} (${d.headcount})`).join(", ")} — no snapshot is generated or
+              displayed for any department under {PRIVACY_FLOOR_HEADCOUNT} people.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -57,8 +64,11 @@ export default async function BurnoutRadarPage() {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-3">Intervention audit trail</h2>
-        <div className="rounded-md border overflow-x-auto">
+        <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
+          <ScrollText className="size-4 text-primary" />
+          Intervention audit trail
+        </h2>
+        <div className="rounded-xl overflow-x-auto bg-card shadow-[var(--shadow-card)]">
           <Table>
             <TableHeader>
               <TableRow>
