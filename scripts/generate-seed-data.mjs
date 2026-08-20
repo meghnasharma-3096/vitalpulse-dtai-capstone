@@ -195,20 +195,35 @@ for (const dept of DEPARTMENTS) {
   }
 }
 
+// Subsystem A's cold-start edge case (lib/subsystem-a.ts: isColdStart) requires
+// at least one "standard"-persona employee hired within COLD_START_MONTHS (6) of
+// the app's simulated anchor date (2026-08-19, see lib/data.ts SIMULATION_ANCHOR).
+// None of the randomly-generated hire dates happened to land in that window, so
+// pin one explicitly rather than leaving the edge case untestable.
+{
+  const coldStartCandidate = employees.find(e => e.name === "Tara Menon" && e.personaTag === "standard");
+  if (coldStartCandidate) {
+    coldStartCandidate.hireDate = "2026-03-01"; // ~5.6 months before the sim anchor
+  }
+}
+
 // ---------- Wellness programs (Subsystem A owns the business logic, seed data still needed) ----------
 // costPerEmployeeINR is an annual per-enrolled-employee cost (matches the annual
 // horizon of the ROI calculator's claims/attrition/absenteeism assumptions).
+// recommendedCount is Subsystem A's own field (lib/subsystem-a.ts: WellnessProgramExtended,
+// "the wellness-programs.json we own adds this field beyond the shared interface") — kept
+// here too so rerunning this script doesn't silently drop it from the live data file.
 const wellnessPrograms = [
-  { id: "PROG-001", name: "MindEase Therapy Sessions", category: "mental_health", provider: "MindEase Wellness", capacity: 60, enrolledCount: 47, costPerEmployeeINR: 22000 },
-  { id: "PROG-002", name: "CultFit Corporate Membership", category: "fitness", provider: "CultFit", capacity: 100, enrolledCount: 88, costPerEmployeeINR: 18000 },
-  { id: "PROG-003", name: "NutriWell Diet Coaching", category: "nutrition", provider: "NutriWell", capacity: 40, enrolledCount: 22, costPerEmployeeINR: 12000 },
-  { id: "PROG-004", name: "FinWise Retirement Planning", category: "financial_wellness", provider: "FinWise Advisors", capacity: 50, enrolledCount: 19, costPerEmployeeINR: 9000 },
-  { id: "PROG-005", name: "Mindful Mornings Meditation", category: "mental_health", provider: "MindEase Wellness", capacity: 80, enrolledCount: 61, costPerEmployeeINR: 6000 },
-  { id: "PROG-006", name: "Yoga & Flexibility Circuit", category: "fitness", provider: "FlexFit Studios", capacity: 45, enrolledCount: 45, costPerEmployeeINR: 10000 },
-  { id: "PROG-007", name: "New Parent Support Circle", category: "mental_health", provider: "MindEase Wellness", capacity: 25, enrolledCount: 11, costPerEmployeeINR: 15000 },
-  { id: "PROG-008", name: "Budgeting & Debt Clinic", category: "financial_wellness", provider: "FinWise Advisors", capacity: 35, enrolledCount: 14, costPerEmployeeINR: 7000 },
-  { id: "PROG-009", name: "Ergonomics & Desk Health", category: "fitness", provider: "CultFit", capacity: 100, enrolledCount: 52, costPerEmployeeINR: 4000 },
-  { id: "PROG-010", name: "Nutrition for Night Shifts", category: "nutrition", provider: "NutriWell", capacity: 30, enrolledCount: 8, costPerEmployeeINR: 12000 },
+  { id: "PROG-001", name: "MindEase Therapy Sessions", category: "mental_health", provider: "MindEase Wellness", capacity: 60, enrolledCount: 47, costPerEmployeeINR: 22000, recommendedCount: 52 },
+  { id: "PROG-002", name: "CultFit Corporate Membership", category: "fitness", provider: "CultFit", capacity: 100, enrolledCount: 88, costPerEmployeeINR: 18000, recommendedCount: 78 },
+  { id: "PROG-003", name: "NutriWell Diet Coaching", category: "nutrition", provider: "NutriWell", capacity: 40, enrolledCount: 22, costPerEmployeeINR: 12000, recommendedCount: 28 },
+  { id: "PROG-004", name: "FinWise Retirement Planning", category: "financial_wellness", provider: "FinWise Advisors", capacity: 50, enrolledCount: 19, costPerEmployeeINR: 9000, recommendedCount: 24 },
+  { id: "PROG-005", name: "Mindful Mornings Meditation", category: "mental_health", provider: "MindEase Wellness", capacity: 80, enrolledCount: 61, costPerEmployeeINR: 6000, recommendedCount: 55 },
+  { id: "PROG-006", name: "Yoga & Flexibility Circuit", category: "fitness", provider: "FlexFit Studios", capacity: 45, enrolledCount: 45, costPerEmployeeINR: 10000, recommendedCount: 40 },
+  { id: "PROG-007", name: "New Parent Support Circle", category: "mental_health", provider: "MindEase Wellness", capacity: 25, enrolledCount: 11, costPerEmployeeINR: 15000, recommendedCount: 14 },
+  { id: "PROG-008", name: "Budgeting & Debt Clinic", category: "financial_wellness", provider: "FinWise Advisors", capacity: 35, enrolledCount: 14, costPerEmployeeINR: 7000, recommendedCount: 18 },
+  { id: "PROG-009", name: "Ergonomics & Desk Health", category: "fitness", provider: "CultFit", capacity: 100, enrolledCount: 52, costPerEmployeeINR: 4000, recommendedCount: 45 },
+  { id: "PROG-010", name: "Nutrition for Night Shifts", category: "nutrition", provider: "NutriWell", capacity: 30, enrolledCount: 8, costPerEmployeeINR: 12000, recommendedCount: 35 },
 ];
 
 // ---------- Nudges (Subsystem B) ----------

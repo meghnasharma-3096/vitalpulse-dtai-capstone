@@ -2,7 +2,9 @@ import "server-only";
 import {
   getWellnessPrograms,
   getEmployeeById,
+  getEmployeesForAggregation,
   isDepartmentFlaggedHighRisk,
+  getSimulatedDate,
   BURNOUT_HIGH_RISK_THRESHOLD,
   type Employee,
   type WellnessProgram,
@@ -87,7 +89,10 @@ function getProgramStatus(program: WellnessProgram): ProgramStatus {
 
 function isRecentHire(employee: Employee): boolean {
   const hireDate = new Date(employee.hireDate);
-  const now = new Date();
+  // Anchor to the app's simulated clock (lib/data.ts), not real wall-clock
+  // time — otherwise this silently drifts out of range as real time passes,
+  // independent of the "Advance to next week" demo control.
+  const now = getSimulatedDate();
   const diffMs = now.getTime() - hireDate.getTime();
   const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
   return diffMonths <= COLD_START_MONTHS;
@@ -252,6 +257,52 @@ export function getProgramCatalogWithUtilization(
       status,
       underutilized,
     };
+  });
+}
+
+/**
+ * Program catalog for a Department Manager — same catalog as HR Admin
+ * (docs/subsystem-a-spec.md Section 3), but `recommendedCount` (and the
+ * `underutilized` signal derived from it) is scoped to their own department's
+ * employees only, computed live from the roster rather than the company-wide
+ * counter. Capacity/enrolledCount/status stay company-wide on purpose — the
+ * schema has no per-employee enrollment records to filter by department, so
+ * there is no honest per-department version of those two fields to show.
+ */
+export function getProgramCatalogForDepartment(user: CurrentUser | null): ProgramWithUtilization[] {
+  const rawPrograms = getWellnessPrograms(user) as WellnessProgramExtended[];
+  if (!user || user.role !== "dept_manager") {
+    // Not a dept manager: no department to scope to, fall back to the
+    // company-wide view rather than erroring.
+    return getProgramCatalogWithUtilization(user);
+  }
+
+  const deptEmployees = getEmployeesForAggregation(user).filter(e => !e.optedOut);
+  const deptRecommendedCount = new Map<string, number>();
+
+  for (const emp of deptEmployees) {
+    // Mirror generateProgramRecommendation's conflict rule (no LLM call needed
+    // for a count — this only needs the ranking, not the generated text).
+    if (emp.disengagementRiskScore >= DISENGAGEMENT_HIGH_THRESHOLD) continue;
+    if (isDepartmentFlaggedHighRisk(emp.departmentId)) continue;
+
+    const ranked = isColdStart(emp) ? rankProgramsColdStart(rawPrograms) : rankPrograms(emp, rawPrograms);
+    for (const program of ranked.slice(0, 3)) {
+      deptRecommendedCount.set(program.id, (deptRecommendedCount.get(program.id) ?? 0) + 1);
+    }
+  }
+
+  return rawPrograms.map(p => {
+    const utilizationPct = Math.round((p.enrolledCount / p.capacity) * 100);
+    const status = getProgramStatus(p);
+    const recommendedCount = deptRecommendedCount.get(p.id) ?? 0;
+
+    // Department-scale underutilization: recommended to more of the
+    // department's employees than their proportional share of enrollment
+    // would suggest, and still meaningfully open.
+    const underutilized = recommendedCount >= 2 && p.enrolledCount < p.capacity * 0.5;
+
+    return { ...p, recommendedCount, utilizationPct, status, underutilized };
   });
 }
 
