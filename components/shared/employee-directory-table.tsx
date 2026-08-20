@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,6 +16,7 @@ interface DeptOption {
 }
 
 export function EmployeeDirectoryTable({ employees, departments }: { employees: Employee[]; departments: DeptOption[] }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [dept, setDept] = useState("all");
 
@@ -59,9 +61,13 @@ export function EmployeeDirectoryTable({ employees, departments }: { employees: 
           </TableHeader>
           <TableBody>
             {filtered.map(e => (
-              <TableRow key={e.id}>
+              <TableRow
+                key={e.id}
+                onClick={() => router.push(`/hr-admin/employees/${e.id}`)}
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+              >
                 <TableCell>
-                  <Link href={`/hr-admin/employees/${e.id}`} className="font-medium hover:underline">{e.name}</Link>
+                  <Link href={`/hr-admin/employees/${e.id}`} className="font-medium hover:underline" onClick={(ev) => ev.stopPropagation()}>{e.name}</Link>
                   <div className="text-xs text-muted-foreground">{e.roleTitle}</div>
                 </TableCell>
                 <TableCell className="text-sm">{deptName(e.departmentId)}</TableCell>
