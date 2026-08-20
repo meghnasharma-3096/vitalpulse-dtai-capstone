@@ -3,6 +3,7 @@ import { UserX, Radar, HeartPulse, UserCog, Bell } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getEmployeeById, getDepartmentById, getNudgesForEmployee, getLatestBurnoutSnapshotForDepartment, isDepartmentFlaggedHighRisk } from "@/lib/data";
 import { explainNudge } from "@/lib/subsystem-b";
+import { getProgramMatchesForProfile, CATEGORY_LABEL } from "@/lib/subsystem-a";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
@@ -18,6 +19,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
   const departmentFlagged = isDepartmentFlaggedHighRisk(employee.departmentId);
   const latestSnapshot = getLatestBurnoutSnapshotForDepartment(employee.departmentId, user);
   const nudges = employee.optedOut ? [] : getNudgesForEmployee(employee.id, user);
+  const programMatches = await getProgramMatchesForProfile(employee, user);
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -84,8 +86,30 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
             </CardTitle>
             <CardDescription>Subsystem A — Wellness Matching</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Owned by a separate subsystem build — not wired up yet in this workspace.
+          <CardContent className="text-sm space-y-2">
+            {employee.optedOut ? (
+              <p className="text-xs text-muted-foreground">No matches — employee has opted out of wellness tracking.</p>
+            ) : programMatches.suppressed ? (
+              <p className="text-xs text-[#7A4A12] bg-[color-mix(in_oklch,var(--risk-medium)_10%,transparent)] p-2 rounded-md border border-[var(--risk-medium)]/30">
+                {programMatches.suppressed}
+              </p>
+            ) : programMatches.recommendations.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No program matches available.</p>
+            ) : (
+              <div className="space-y-2.5">
+                {programMatches.recommendations.map((rec) => (
+                  <div key={rec.program.id} className="border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-medium text-xs text-foreground truncate">{rec.program.name}</span>
+                      <Badge variant="outline" className="text-[10px] shrink-0">
+                        {CATEGORY_LABEL[rec.program.category]}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{rec.explanation}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

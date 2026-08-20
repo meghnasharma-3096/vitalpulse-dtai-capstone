@@ -6,7 +6,8 @@
     "provider": "MindEase Wellness",
     "capacity": 60,
     "enrolledCount": 47,
-    "costPerEmployeeINR": 22000
+    "costPerEmployeeINR": 22000,
+    "recommendedCount": 52
   },
   {
     "id": "PROG-002",
@@ -15,7 +16,8 @@
     "provider": "CultFit",
     "capacity": 100,
     "enrolledCount": 88,
-    "costPerEmployeeINR": 18000
+    "costPerEmployeeINR": 18000,
+    "recommendedCount": 78
   },
   {
     "id": "PROG-003",
@@ -24,7 +26,8 @@
     "provider": "NutriWell",
     "capacity": 40,
     "enrolledCount": 22,
-    "costPerEmployeeINR": 12000
+    "costPerEmployeeINR": 12000,
+    "recommendedCount": 28
   },
   {
     "id": "PROG-004",
@@ -33,7 +36,8 @@
     "provider": "FinWise Advisors",
     "capacity": 50,
     "enrolledCount": 19,
-    "costPerEmployeeINR": 9000
+    "costPerEmployeeINR": 9000,
+    "recommendedCount": 24
   },
   {
     "id": "PROG-005",
@@ -42,7 +46,8 @@
     "provider": "MindEase Wellness",
     "capacity": 80,
     "enrolledCount": 61,
-    "costPerEmployeeINR": 6000
+    "costPerEmployeeINR": 6000,
+    "recommendedCount": 55
   },
   {
     "id": "PROG-006",
@@ -51,7 +56,8 @@
     "provider": "FlexFit Studios",
     "capacity": 45,
     "enrolledCount": 45,
-    "costPerEmployeeINR": 10000
+    "costPerEmployeeINR": 10000,
+    "recommendedCount": 40
   },
   {
     "id": "PROG-007",
@@ -60,7 +66,8 @@
     "provider": "MindEase Wellness",
     "capacity": 25,
     "enrolledCount": 11,
-    "costPerEmployeeINR": 15000
+    "costPerEmployeeINR": 15000,
+    "recommendedCount": 14
   },
   {
     "id": "PROG-008",
@@ -69,7 +76,8 @@
     "provider": "FinWise Advisors",
     "capacity": 35,
     "enrolledCount": 14,
-    "costPerEmployeeINR": 7000
+    "costPerEmployeeINR": 7000,
+    "recommendedCount": 18
   },
   {
     "id": "PROG-009",
@@ -78,7 +86,8 @@
     "provider": "CultFit",
     "capacity": 100,
     "enrolledCount": 52,
-    "costPerEmployeeINR": 4000
+    "costPerEmployeeINR": 4000,
+    "recommendedCount": 45
   },
   {
     "id": "PROG-010",
@@ -87,6 +96,7 @@
     "provider": "NutriWell",
     "capacity": 30,
     "enrolledCount": 8,
-    "costPerEmployeeINR": 12000
+    "costPerEmployeeINR": 12000,
+    "recommendedCount": 35
   }
 ]
