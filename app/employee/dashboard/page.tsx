@@ -1,8 +1,10 @@
-import { Activity, Bell } from "lucide-react";
+import { Activity, Bell, HeartPulse } from "lucide-react";
 import { getCurrentUser, getEmployeeRecordForUser } from "@/lib/auth-server";
 import { getNudgesForEmployee, isDepartmentFlaggedHighRisk } from "@/lib/data";
 import { explainNudge } from "@/lib/subsystem-b";
+import { getRecommendationsForEmployee } from "@/lib/subsystem-a";
 import { NudgeCard } from "@/components/subsystem-b/nudge-card";
+import { RecommendedPrograms } from "@/components/subsystem-a/recommended-programs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
 
@@ -33,6 +35,7 @@ export default async function EmployeeDashboardPage() {
   const nudges = getNudgesForEmployee(employee.id, user);
   const departmentFlagged = isDepartmentFlaggedHighRisk(employee.departmentId);
   const riskLevel = riskLevelFromScore(employee.disengagementRiskScore);
+  const recommendationResult = await getRecommendationsForEmployee(employee, user);
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -58,6 +61,14 @@ export default async function EmployeeDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      <div>
+        <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
+          <HeartPulse className="size-4 text-primary" />
+          Recommended programs
+        </h2>
+        <RecommendedPrograms result={recommendationResult} />
+      </div>
 
       <div>
         <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
