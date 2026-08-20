@@ -59,7 +59,7 @@ export function AtRiskEmployeeTable({ employees, departments }: { employees: AtR
         </Select>
       </div>
 
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-xl overflow-x-auto bg-card shadow-[var(--shadow-card)]">
         <Table>
           <TableHeader>
             <TableRow>

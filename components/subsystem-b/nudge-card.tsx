@@ -28,7 +28,7 @@ export function NudgeCard({
   const isActive = nudge.status === "sent";
 
   return (
-    <Card className={isActive ? "border-[#2D6A4F]/30" : "opacity-80"}>
+    <Card className={isActive ? "shadow-[var(--shadow-card-hover)]" : "opacity-80"}>
       <CardContent className="pt-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
@@ -49,7 +49,6 @@ export function NudgeCard({
               size="sm"
               disabled={isPending}
               onClick={() => startTransition(async () => { await actOnNudgeAction(nudge.id); })}
-              className="bg-[#2D6A4F] hover:bg-[#1B4332]"
             >
               Act on this
             </Button>

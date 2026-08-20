@@ -1,6 +1,7 @@
 "use client";
 
-import { Bar, BarChart, Cell, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { PieChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { DisengagementDistribution } from "@/lib/subsystem-b";
 
@@ -15,13 +16,17 @@ export function DisengagementDistributionChart({ distribution }: { distribution:
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Company-wide disengagement risk</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <PieChart className="size-4 text-primary" />
+          Company-wide disengagement risk
+        </CardTitle>
         <CardDescription>{distribution.total} employees total</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
+              <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
               <XAxis dataKey="level" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Bar dataKey="count" radius={[6, 6, 0, 0]}>

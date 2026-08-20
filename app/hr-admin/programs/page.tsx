@@ -1,3 +1,4 @@
+import { HeartPulse } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getWellnessPrograms } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,10 @@ export default async function ProgramsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1B4332] dark:text-[#B7EFC5]">Wellness Programs</h1>
+          <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
+            <HeartPulse className="size-6 text-primary" />
+            Wellness Programs
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">Program catalog and capacity — matching logic is owned by Subsystem A, built separately.</p>
         </div>
         <Badge variant="outline">Subsystem A — not yet built in this workspace</Badge>

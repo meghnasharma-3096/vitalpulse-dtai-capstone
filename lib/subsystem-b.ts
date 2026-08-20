@@ -13,6 +13,7 @@ import {
   addNudge,
   nextNudgeId,
   getSimulatedDate,
+  BURNOUT_HIGH_RISK_THRESHOLD,
 } from "@/lib/data";
 import { generateNudge } from "@/lib/llm";
 import { riskLevelFromScore, type RiskLevel } from "@/components/shared/risk-badge";
@@ -64,11 +65,21 @@ export interface NudgeEligibility {
   reason: string;
   consecutiveDismissals: number;
   recommendedType: Nudge["type"];
+  /** Condition (1): the employee's own disengagementRiskScore is high. */
+  employeeHighRisk: boolean;
+  /** Condition (2): the employee's department is flagged by Subsystem C's burnout radar. */
+  departmentFlaggedHighRisk: boolean;
+  /** Convenience OR of the two conditions above — suppress a new-program nudge if either is true. */
   suppressNewProgram: boolean;
 }
 
 const FATIGUE_DISMISSAL_THRESHOLD = 2;
 const FATIGUE_COOLDOWN_DAYS = 21;
+
+/** Condition (1) of the conflict rule, standalone so callers other than getNudgeEligibility (e.g. explainNudge) can reuse it without duplicating the threshold check. */
+export function isEmployeeHighRisk(emp: Employee): boolean {
+  return emp.disengagementRiskScore >= BURNOUT_HIGH_RISK_THRESHOLD;
+}
 
 export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentFlaggedHighRisk: boolean): NudgeEligibility {
   const sorted = [...history].sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
@@ -79,7 +90,10 @@ export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentF
     else break;
   }
 
-  const suppressNewProgram = departmentFlaggedHighRisk;
+  // Conflict rule: two independent conditions, kept separate (not collapsed) so
+  // Subsystem A can read either one on its own for its own conflict-rule check.
+  const employeeHighRisk = isEmployeeHighRisk(emp);
+  const suppressNewProgram = employeeHighRisk || departmentFlaggedHighRisk;
   let recommendedType: Nudge["type"] = suppressNewProgram ? "check_in" : "new_program";
 
   if (consecutiveDismissals >= FATIGUE_DISMISSAL_THRESHOLD) {
@@ -91,6 +105,8 @@ export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentF
         reason: `${emp.name.split(" ")[0]} has dismissed ${consecutiveDismissals} nudges in a row — cooling off for ${FATIGUE_COOLDOWN_DAYS - daysSinceLast} more day(s) before trying a different approach.`,
         consecutiveDismissals,
         recommendedType,
+        employeeHighRisk,
+        departmentFlaggedHighRisk,
         suppressNewProgram,
       };
     }
@@ -100,13 +116,26 @@ export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentF
 
   return {
     eligible: true,
-    reason: suppressNewProgram
-      ? "Department is currently flagged high-risk by the burnout radar — sending a lighter check-in instead of a new-program push."
-      : "Standard nudge cycle.",
+    reason: conflictRuleReason(employeeHighRisk, departmentFlaggedHighRisk),
     consecutiveDismissals,
     recommendedType,
+    employeeHighRisk,
+    departmentFlaggedHighRisk,
     suppressNewProgram,
   };
+}
+
+function conflictRuleReason(employeeHighRisk: boolean, departmentFlaggedHighRisk: boolean): string {
+  if (employeeHighRisk && departmentFlaggedHighRisk) {
+    return "Your own disengagement risk score is high and your department is currently flagged high-risk by the burnout radar — sending a lighter check-in instead of a new-program push.";
+  }
+  if (employeeHighRisk) {
+    return "Your own disengagement risk score is high — sending a lighter check-in instead of a new-program push.";
+  }
+  if (departmentFlaggedHighRisk) {
+    return "Your department is currently flagged high-risk by the burnout radar — sending a lighter check-in instead of a new-program push.";
+  }
+  return "Standard nudge cycle.";
 }
 
 function daysBetween(isoDate: string, ref: Date): number {
@@ -182,11 +211,17 @@ function pickProgramForPersona(emp: Employee, programs: ReturnType<typeof getWel
   return preferred[0] ?? programs[0];
 }
 
-export function explainNudge(nudge: Nudge, emp: Employee, eligibility?: NudgeEligibility, departmentFlagged?: boolean): string {
+export function explainNudge(nudge: Nudge, emp: Employee, eligibility?: NudgeEligibility, departmentFlaggedHighRisk?: boolean): string {
   const parts: string[] = [];
   parts.push(`You're seeing this because your disengagement signals put you in the "${emp.personaTag.replace("_", " ")}" persona with a current risk score of ${emp.disengagementRiskScore.toFixed(2)}.`);
-  if (departmentFlagged) {
-    parts.push("Your department is currently flagged high-risk by the burnout radar, so this is a lighter check-in rather than a push toward a new program.");
+
+  // Prefer the eligibility snapshot from generation time when we have it; otherwise
+  // derive both conflict-rule conditions the same way getNudgeEligibility does.
+  const employeeHighRisk = eligibility?.employeeHighRisk ?? isEmployeeHighRisk(emp);
+  const departmentFlagged = eligibility?.departmentFlaggedHighRisk ?? departmentFlaggedHighRisk ?? false;
+
+  if (employeeHighRisk || departmentFlagged) {
+    parts.push(conflictRuleReason(employeeHighRisk, departmentFlagged));
   } else if (nudge.type === "new_program") {
     parts.push("Based on your engagement history, we matched you to a program rather than a generic reminder.");
   }

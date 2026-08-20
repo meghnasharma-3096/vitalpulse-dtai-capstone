@@ -1,21 +1,23 @@
+import { LayoutDashboard, Users, HeartPulse, Calculator, Radar, Users2, UserCircle, type LucideIcon } from "lucide-react";
 import type { Role } from "@/lib/auth-server";
 
 export interface NavItem {
   label: string;
   href: string;
+  icon: LucideIcon;
 }
 
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
-  cfo: [{ label: "Executive Dashboard", href: "/cfo/dashboard" }],
+  cfo: [{ label: "Executive Dashboard", href: "/cfo/dashboard", icon: LayoutDashboard }],
   hr_admin: [
-    { label: "Dashboard", href: "/hr-admin/dashboard" },
-    { label: "Employees", href: "/hr-admin/employees" },
-    { label: "Wellness Programs", href: "/hr-admin/programs" },
-    { label: "ROI Calculator", href: "/hr-admin/roi" },
-    { label: "Burnout Radar", href: "/hr-admin/burnout-radar" },
+    { label: "Dashboard", href: "/hr-admin/dashboard", icon: LayoutDashboard },
+    { label: "Employees", href: "/hr-admin/employees", icon: Users },
+    { label: "Wellness Programs", href: "/hr-admin/programs", icon: HeartPulse },
+    { label: "ROI Calculator", href: "/hr-admin/roi", icon: Calculator },
+    { label: "Burnout Radar", href: "/hr-admin/burnout-radar", icon: Radar },
   ],
-  dept_manager: [{ label: "Department Dashboard", href: "/dept-manager/dashboard" }],
-  employee: [{ label: "My Dashboard", href: "/employee/dashboard" }],
+  dept_manager: [{ label: "Department Dashboard", href: "/dept-manager/dashboard", icon: Users2 }],
+  employee: [{ label: "My Dashboard", href: "/employee/dashboard", icon: UserCircle }],
 };
 
 export const ROLE_LABEL: Record<Role, string> = {

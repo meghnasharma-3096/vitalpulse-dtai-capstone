@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LineChart, ShieldCheck, Users2, UserCircle, ChevronDown, KeyRound, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
+  const [credentialsOpen, setCredentialsOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -66,19 +68,19 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
-        <RoleCard title="CFO / Exec" description="Company-wide rollup, no operational detail">
+        <RoleCard icon={LineChart} title="CFO / Exec" description="Company-wide rollup, no operational detail">
           {cfo && (
             <QuickLoginButton account={cfo} label={`Log in as CFO — ${cfo.name}`} loading={loadingId === cfo.id} onClick={() => loginWith({ credentialId: cfo.id })} />
           )}
         </RoleCard>
 
-        <RoleCard title="HR Admin" description="Full company-wide access across all three subsystems">
+        <RoleCard icon={ShieldCheck} title="HR Admin" description="Full company-wide access across all three subsystems">
           {hrAdmin && (
             <QuickLoginButton account={hrAdmin} label={`Log in as HR Admin — ${hrAdmin.name}`} loading={loadingId === hrAdmin.id} onClick={() => loginWith({ credentialId: hrAdmin.id })} />
           )}
         </RoleCard>
 
-        <RoleCard title="Department Manager" description="Same views as HR Admin, scoped to one department">
+        <RoleCard icon={Users2} title="Department Manager" description="Same views as HR Admin, scoped to one department">
           <div className="flex flex-col gap-2">
             {deptManagers.map(a => (
               <QuickLoginButton
@@ -92,7 +94,7 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
           </div>
         </RoleCard>
 
-        <RoleCard title="Employee" description="Sees only their own matches, nudges, and profile">
+        <RoleCard icon={UserCircle} title="Employee" description="Sees only their own matches, nudges, and profile">
           <div className="flex flex-col gap-2">
             {employees.map(a => (
               <QuickLoginButton
@@ -108,73 +110,104 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
         </RoleCard>
       </div>
 
-      {error && <p className="text-sm text-[#E63946] text-center">{error}</p>}
+      {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
-      <Card className="bg-muted/40">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            Demo credentials <Badge variant="outline">For demo/grading purposes</Badge>
-          </CardTitle>
-          <CardDescription>Every seeded account shares the password below — use them with the manual sign-in form if you&apos;d rather not use the one-click buttons.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-xs font-mono bg-background rounded-md border p-3 overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-muted-foreground">
-                  <th className="pr-4 py-1">Email</th>
-                  <th className="pr-4 py-1">Role</th>
-                  <th className="py-1">Password</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map(a => (
-                  <tr key={a.id} className="border-t">
-                    <td className="pr-4 py-1">{a.email}</td>
-                    <td className="pr-4 py-1">{a.role}{a.departmentName ? ` (${a.departmentName})` : ""}</td>
-                    <td className="py-1">{DEMO_PASSWORD}</td>
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setCredentialsOpen(o => !o)}
+          aria-expanded={credentialsOpen}
+        >
+          <KeyRound className="size-3.5" />
+          {credentialsOpen ? "Hide demo credentials" : "Show demo credentials"}
+          <ChevronDown className={`size-3.5 transition-transform duration-200 ${credentialsOpen ? "rotate-180" : ""}`} />
+        </Button>
+      </div>
+
+      {credentialsOpen && (
+        <Card className="bg-muted/40">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              Demo credentials <Badge variant="outline">For demo/grading purposes</Badge>
+            </CardTitle>
+            <CardDescription>Every seeded account shares the password below — use them with the manual sign-in form if you&apos;d rather not use the one-click buttons.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-xs font-mono bg-background rounded-xl p-3 overflow-x-auto shadow-[var(--shadow-card)]">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-muted-foreground">
+                    <th className="pr-4 py-1">Email</th>
+                    <th className="pr-4 py-1">Role</th>
+                    <th className="py-1">Password</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {accounts.map(a => (
+                    <tr key={a.id} className="border-t">
+                      <td className="pr-4 py-1">{a.email}</td>
+                      <td className="pr-4 py-1">{a.role}{a.departmentName ? ` (${a.departmentName})` : ""}</td>
+                      <td className="py-1">{DEMO_PASSWORD}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <button type="button" className="text-xs text-[#2D6A4F] underline underline-offset-2" onClick={() => setManualOpen(o => !o)}>
-            {manualOpen ? "Hide manual sign-in" : "Sign in manually with email + password"}
-          </button>
+            <button type="button" className="text-xs text-primary underline underline-offset-2" onClick={() => setManualOpen(o => !o)}>
+              {manualOpen ? "Hide manual sign-in" : "Sign in manually with email + password"}
+            </button>
 
-          {manualOpen && (
-            <form
-              className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end"
-              onSubmit={e => {
-                e.preventDefault();
-                loginWith({ email, password });
-              }}
-            >
-              <div className="space-y-1">
-                <Label htmlFor="email" className="text-xs">Email</Label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hradmin@meridiananalytics.com" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="password" className="text-xs">Password</Label>
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={DEMO_PASSWORD} required />
-              </div>
-              <Button type="submit" disabled={loadingId === "manual"}>
-                {loadingId === "manual" ? "Signing in…" : "Sign in"}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+            {manualOpen && (
+              <form
+                className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end"
+                onSubmit={e => {
+                  e.preventDefault();
+                  loginWith({ email, password });
+                }}
+              >
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hradmin@meridiananalytics.com" required />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="password" className="text-xs">Password</Label>
+                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={DEMO_PASSWORD} required />
+                </div>
+                <Button type="submit" disabled={loadingId === "manual"}>
+                  {loadingId === "manual" ? "Signing in…" : "Sign in"}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
 
-function RoleCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function RoleCard({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Card>
+    <Card className="hover:shadow-[var(--shadow-card-hover)]">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="flex items-center gap-2.5 text-base">
+          <span className="flex size-8 items-center justify-center rounded-full bg-primary-tint text-primary">
+            <Icon className="size-4" />
+          </span>
+          {title}
+        </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>{children}</CardContent>
@@ -195,13 +228,7 @@ function QuickLoginButton({
   onClick: () => void;
 }) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      className="w-full justify-between h-auto py-2 border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/5 hover:text-[#2D6A4F]"
-      onClick={onClick}
-      disabled={loading}
-    >
+    <Button type="button" variant="outline" className="w-full justify-between h-auto py-2" onClick={onClick} disabled={loading}>
       <span className="text-left">
         <span className="block text-sm font-medium">{label}</span>
         {sublabel && <span className="block text-xs text-muted-foreground">{sublabel}</span>}
