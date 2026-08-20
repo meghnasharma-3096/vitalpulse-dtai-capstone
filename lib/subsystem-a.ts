@@ -4,6 +4,7 @@ import {
   getEmployeeById,
   getEmployeesForAggregation,
   isDepartmentFlaggedHighRisk,
+  getSimulatedDate,
   BURNOUT_HIGH_RISK_THRESHOLD,
   type Employee,
   type WellnessProgram,
@@ -88,7 +89,10 @@ function getProgramStatus(program: WellnessProgram): ProgramStatus {
 
 function isRecentHire(employee: Employee): boolean {
   const hireDate = new Date(employee.hireDate);
-  const now = new Date();
+  // Anchor to the app's simulated clock (lib/data.ts), not real wall-clock
+  // time — otherwise this silently drifts out of range as real time passes,
+  // independent of the "Advance to next week" demo control.
+  const now = getSimulatedDate();
   const diffMs = now.getTime() - hireDate.getTime();
   const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
   return diffMonths <= COLD_START_MONTHS;
