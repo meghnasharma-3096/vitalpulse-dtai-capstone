@@ -161,7 +161,7 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
           )}
         </RoleCard>
 
-        <RoleCard icon={ShieldCheck} title="HR Admin" description="Full company-wide access across all three subsystems">
+        <RoleCard icon={ShieldCheck} title="HR Admin" description="Full company-wide access across the platform">
           {hrAdmin && (
             <QuickLoginButton account={hrAdmin} label={`Log in as HR Admin — ${hrAdmin.name}`} loading={loadingId === hrAdmin.id} onClick={() => loginWith({ credentialId: hrAdmin.id })} />
           )}

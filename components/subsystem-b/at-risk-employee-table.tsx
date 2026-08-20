@@ -66,7 +66,7 @@ export function AtRiskEmployeeTable({ employees, departments }: { employees: AtR
               <TableHead>Employee</TableHead>
               <TableHead>Risk</TableHead>
               <TableHead>Persona</TableHead>
-              <TableHead>Conflict rule</TableHead>
+              <TableHead>Nudges suppressed?</TableHead>
               <TableHead>Latest nudge</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>

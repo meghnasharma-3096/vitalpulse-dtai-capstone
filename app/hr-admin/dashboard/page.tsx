@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Compass, Building2, TriangleAlert, UserX, ShieldAlert, HeartPulse, Radar, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth-server";
@@ -9,6 +10,10 @@ import { DisengagementDistributionChart } from "@/components/subsystem-b/disenga
 
 export default async function HrAdminDashboardPage() {
   const user = await getCurrentUser();
+  if (!user || user.role !== "hr_admin") {
+    redirect("/login");
+  }
+
   const departments = getDepartments(user);
   const atRisk = getAtRiskEmployees(user);
   const distribution = getDisengagementDistribution(user);
@@ -19,7 +24,7 @@ export default async function HrAdminDashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold text-foreground">HR Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Full company-wide access across all three subsystems.</p>
+        <p className="text-sm text-muted-foreground mt-1">Full company-wide access across the platform.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -35,14 +40,14 @@ export default async function HrAdminDashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Compass className="size-4 text-primary" />
-              Jump to a subsystem
+              Jump to a section
             </CardTitle>
             <CardDescription>Each area is scoped to what HR Admin can see company-wide</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <QuickLink icon={HeartPulse} href="/hr-admin/roi" label="Disengagement & ROI — Subsystem B" />
-            <QuickLink icon={HeartPulse} href="/hr-admin/programs" label="Wellness Matching — Subsystem A" />
-            <QuickLink icon={Radar} href="/hr-admin/burnout-radar" label="Burnout Radar & Governance — Subsystem C" />
+            <QuickLink icon={HeartPulse} href="/hr-admin/roi" label="Disengagement & ROI" />
+            <QuickLink icon={HeartPulse} href="/hr-admin/programs" label="Wellness Matching" />
+            <QuickLink icon={Radar} href="/hr-admin/burnout-radar" label="Burnout Radar & Governance" />
             <QuickLink icon={Users} href="/hr-admin/employees" label="Unified employee directory" />
           </CardContent>
         </Card>

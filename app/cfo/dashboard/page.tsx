@@ -1,4 +1,5 @@
 import { LayoutDashboard } from "lucide-react";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getAiVsWithoutComparison, getDisengagementDistribution, getNudgeEngagementTrend } from "@/lib/subsystem-b";
 import { AiVsWithoutChart } from "@/components/subsystem-b/ai-vs-without-chart";
@@ -7,6 +8,10 @@ import { NudgeEngagementTrendChart } from "@/components/subsystem-b/nudge-engage
 
 export default async function CfoDashboardPage() {
   const user = await getCurrentUser();
+  if (!user || user.role !== "cfo") {
+    redirect("/login");
+  }
+
   const comparison = getAiVsWithoutComparison(user);
   const distribution = getDisengagementDistribution(user);
   const trend = getNudgeEngagementTrend(user);
