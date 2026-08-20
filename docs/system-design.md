@@ -81,7 +81,7 @@ vitalpulse/
 ### Roles
 1. **CFO / Exec** — company-wide rollup view across all three subsystems, no operational detail
 2. **HR Admin** — full company-wide access across all three subsystems
-3. **Department Manager** — same views as HR Admin but scoped server-side to their own department only
+3. **Department Manager** — same views as HR Admin but scoped server-side to their own department only. Department Manager dashboard is organized into two tabs (Overview, Wellness Programs) rather than a single scrolling page.
 4. **Employee** — sees only their own matches, nudges, and profile; multiple sample employee accounts exist (Section 8)
 
 ### Login page requirements
@@ -196,15 +196,14 @@ Target volume: **~100 employees across 8 departments** (see Section 8 for depart
 
 ---
 
-## 6. Design system
+## 6. Design system (design.md content)
 
-See `design.md` at the repo root — that's the canonical, current design system
-(color tokens, elevation, radius scale, type scale, icon usage, chart styling,
-the "pulse" signature element) and supersedes the short sketch that used to
-live in this section. Still true regardless of edits there: use shadcn/ui
-components (Card, Badge, Table, Dialog, Tabs) — no custom-built equivalents —
-that's the single biggest thing keeping three independently-built subsystems
-visually consistent.
+- **Primary color:** `#2D6A4F` (deep teal-green — wellness, trust, not clinical white)
+- **Accent color:** `#F4A261` (warm amber — used sparingly, for nudges/alerts, not backgrounds)
+- **Risk colors:** low `#52B788`, medium `#F4A261`, high `#E63946` — used consistently across ALL THREE subsystems for any risk indicator (burnout, disengagement, budget)
+- **Typography:** Inter or system-ui sans-serif, no more than 2 weights (regular, semibold)
+- **Layout:** persistent left sidebar nav (role-aware — only shows routes the current role can access), top bar with user name/role and logout
+- **Component rule:** use shadcn/ui components (Card, Badge, Table, Dialog, Tabs) — no custom-built equivalents. This is the single biggest thing keeping three independently-built subsystems visually consistent.
 
 ---
 
