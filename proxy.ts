@@ -60,7 +60,11 @@ export function proxy(req: NextRequest) {
   const isScopedHrAdminView =
     session.role === "dept_manager" && (pathname.startsWith("/hr-admin/employees") || pathname.startsWith("/hr-admin/roi"));
 
-  if (!isOwnArea && !isScopedHrAdminView) {
+  // CFO gets the same company-wide burnout radar HR Admin sees (docs/subsystem-c-spec.md
+  // Section 3 groups CFO with HR Admin for this view) — read-only, enforced in the page itself.
+  const isCfoBurnoutRadarView = session.role === "cfo" && pathname.startsWith("/hr-admin/burnout-radar");
+
+  if (!isOwnArea && !isScopedHrAdminView && !isCfoBurnoutRadarView) {
     return NextResponse.redirect(new URL(ROLE_HOME[session.role], req.url));
   }
 

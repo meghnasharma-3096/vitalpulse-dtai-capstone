@@ -43,11 +43,13 @@ export function InterventionDialog({
   intervention,
   open,
   onOpenChange,
+  readOnly = false,
 }: {
   department: DepartmentBurnoutSummary;
   intervention: Intervention | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  readOnly?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [showEscalateInput, setShowEscalateInput] = useState(false);
@@ -226,7 +228,13 @@ export function InterventionDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0 flex-wrap">
-          {active ? (
+          {readOnly ? (
+            <span className="text-xs text-muted-foreground w-full text-center sm:text-left">
+              {active
+                ? <>Status: <strong className="capitalize text-foreground">{active.status}</strong> · read-only view</>
+                : "No active intervention brief — read-only view"}
+            </span>
+          ) : active ? (
             active.status === "pending" ? (
               <div className="flex items-center justify-between w-full gap-2 flex-wrap sm:flex-nowrap">
                 <Button
