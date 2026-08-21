@@ -106,15 +106,16 @@ export function InterventionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="sm:max-w-lg overflow-hidden">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-2 pr-4">
-            <DialogTitle className="text-xl font-semibold">{department.name}</DialogTitle>
+          <div className="flex items-center justify-between gap-2 pr-6">
+            <DialogTitle className="min-w-0 flex-1 truncate text-xl font-semibold">{department.name}</DialogTitle>
             {department.latestSnapshot && (
               <RiskBadge
                 level={department.riskLevel}
                 score={department.latestSnapshot.riskScore}
                 label={department.trend}
+                className="shrink-0"
               />
             )}
           </div>
