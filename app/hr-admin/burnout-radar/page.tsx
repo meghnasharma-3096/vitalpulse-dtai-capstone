@@ -1,4 +1,4 @@
-import { Radar, ShieldAlert, ScrollText } from "lucide-react";
+import { Radar, ShieldAlert, ScrollText, AlertTriangle, TrendingDown, Clock, LineChart as LineChartIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import {
@@ -19,16 +19,6 @@ export default async function BurnoutRadarPage() {
     redirect("/login");
   }
 
-  const snapshots = getBurnoutSnapshots(user);
-  const interventions = getInterventions(user);
-  const departments = getAllDepartmentsUnscoped();
-
-  const latestByDept = new Map<string, (typeof snapshots)[number]>();
-  for (const s of snapshots) {
-    const existing = latestByDept.get(s.departmentId);
-    if (!existing || existing.weekOf < s.weekOf) latestByDept.set(s.departmentId, s);
-  }
-
   const departments = getDepartmentBurnoutSummaries(user);
   const trendSeries = getDepartmentTrendSeries(user);
   const interventions = getSubsystemInterventions(user);
@@ -43,15 +33,12 @@ export default async function BurnoutRadarPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
-            <Radar className="size-6 text-primary" />
-            Burnout Radar & Governance
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor — the full intervention workflow is built separately.</p>
-        </div>
-        <Badge variant="outline">Not yet built in this workspace</Badge>
+      <div>
+        <h1 className="flex items-center gap-2.5 text-3xl font-semibold text-foreground">
+          <Radar className="size-6 text-primary" />
+          Burnout Radar & Governance
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor and a mandatory human sign-off on every intervention.</p>
       </div>
 
       {/* KPI summary cards */}

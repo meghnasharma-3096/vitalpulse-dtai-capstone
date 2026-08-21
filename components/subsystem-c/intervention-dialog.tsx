@@ -180,7 +180,7 @@ export function InterventionDialog({
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Calendar className="size-3" />
-                    {new Date(active.timestamp).toLocaleString()}
+                    {new Date(active.timestamp).toLocaleString("en-GB")}
                   </span>
                 </div>
               )}

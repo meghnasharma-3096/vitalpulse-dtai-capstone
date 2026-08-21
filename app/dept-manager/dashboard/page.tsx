@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { getDepartments, getBurnoutSnapshots } from "@/lib/data";
 import { getAtRiskEmployees, getDisengagementDistribution } from "@/lib/subsystem-b";
 import { getProgramCatalogForDepartment } from "@/lib/subsystem-a";
+import { getDepartmentBurnoutSummaries, getDepartmentTrendSeries } from "@/lib/subsystem-c";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DisengagementDistributionChart } from "@/components/subsystem-b/disengagement-distribution-chart";
@@ -103,6 +104,22 @@ export default async function DeptManagerDashboardPage() {
               At-risk employees in your department
             </h2>
             <AtRiskEmployeeTable employees={atRisk} departments={[{ id: dept.id, name: dept.name }]} />
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="flex items-center gap-2 text-lg font-semibold mb-1">
+              <ShieldAlert className="size-4 text-primary" />
+              Burnout radar & governance
+            </h2>
+            <BurnoutDepartmentCards departments={burnoutSummaries} />
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Burnout trajectory over time</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DepartmentTrendChart series={trendSeries} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
