@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DisengagementDistributionChart } from "@/components/subsystem-b/disengagement-distribution-chart";
 import { AtRiskEmployeeTable } from "@/components/subsystem-b/at-risk-employee-table";
+import { DepartmentTrendChart } from "@/components/subsystem-c/department-trend-chart";
+import { BurnoutDepartmentCards } from "@/components/subsystem-c/burnout-department-cards";
 import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
 import { ProgramCatalog } from "@/components/subsystem-a/program-catalog";
 import { ProgramUtilizationChart } from "@/components/subsystem-a/program-utilization-chart";
@@ -28,6 +30,9 @@ export default async function DeptManagerDashboardPage() {
   const snapshots = getBurnoutSnapshots(user).sort((a, b) => (a.weekOf < b.weekOf ? 1 : -1));
   const latestSnapshot = snapshots[0];
   const programs = getProgramCatalogForDepartment(user);
+
+  const burnoutSummaries = getDepartmentBurnoutSummaries(user);
+  const trendSeries = getDepartmentTrendSeries(user);
 
   if (!dept) {
     return <p className="text-sm text-muted-foreground">No department scope found for this account.</p>;
@@ -135,8 +140,9 @@ export default async function DeptManagerDashboardPage() {
           </CardTitle>
           <CardDescription>The same underlying data, scoped views HR Admin also uses</CardDescription>
         </CardHeader>
-        <CardContent className="flex gap-3 text-sm">
+        <CardContent className="flex gap-3 text-sm flex-wrap">
           <Link href="/hr-admin/employees" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">Full employee directory</Link>
+          <Link href="/hr-admin/programs" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">Wellness programs</Link>
           <Link href="/hr-admin/roi" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">ROI calculator</Link>
         </CardContent>
       </Card>
