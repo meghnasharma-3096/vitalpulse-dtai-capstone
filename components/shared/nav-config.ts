@@ -8,7 +8,10 @@ export interface NavItem {
 }
 
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
-  cfo: [{ label: "Executive Dashboard", href: "/cfo/dashboard", icon: LayoutDashboard }],
+  cfo: [
+    { label: "Executive Dashboard", href: "/cfo/dashboard", icon: LayoutDashboard },
+    { label: "Burnout Radar", href: "/hr-admin/burnout-radar", icon: Radar },
+  ],
   hr_admin: [
     { label: "Dashboard", href: "/hr-admin/dashboard", icon: LayoutDashboard },
     { label: "Employees", href: "/hr-admin/employees", icon: Users },
