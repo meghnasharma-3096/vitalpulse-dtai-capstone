@@ -1,5 +1,5 @@
+import { Radar, ShieldAlert, ScrollText } from "lucide-react";
 import { redirect } from "next/navigation";
-import { Radar, ShieldAlert, LineChart as LineChartIcon, ScrollText, AlertTriangle, TrendingDown, Clock } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import {
   getDepartmentBurnoutSummaries,
@@ -15,8 +15,18 @@ import { InterventionAuditTable } from "@/components/subsystem-c/intervention-au
 
 export default async function BurnoutRadarPage() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) {
+  if (!user || user.role !== "hr_admin") {
     redirect("/login");
+  }
+
+  const snapshots = getBurnoutSnapshots(user);
+  const interventions = getInterventions(user);
+  const departments = getAllDepartmentsUnscoped();
+
+  const latestByDept = new Map<string, (typeof snapshots)[number]>();
+  for (const s of snapshots) {
+    const existing = latestByDept.get(s.departmentId);
+    if (!existing || existing.weekOf < s.weekOf) latestByDept.set(s.departmentId, s);
   }
 
   const departments = getDepartmentBurnoutSummaries(user);
@@ -39,10 +49,9 @@ export default async function BurnoutRadarPage() {
             <Radar className="size-6 text-primary" />
             Burnout Radar & Governance
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Department-level well-being risk intelligence with a strict sub-{PRIVACY_FLOOR_HEADCOUNT} privacy floor and human sign-off audit trail.
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Department-level risk with a hard privacy floor — the full intervention workflow is built separately.</p>
         </div>
+        <Badge variant="outline">Not yet built in this workspace</Badge>
       </div>
 
       {/* KPI summary cards */}

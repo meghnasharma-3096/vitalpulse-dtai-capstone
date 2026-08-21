@@ -1,4 +1,5 @@
 import { Activity, Bell, HeartPulse } from "lucide-react";
+import { redirect } from "next/navigation";
 import { getCurrentUser, getEmployeeRecordForUser } from "@/lib/auth-server";
 import { getNudgesForEmployee, isDepartmentFlaggedHighRisk } from "@/lib/data";
 import { explainNudge } from "@/lib/subsystem-b";
@@ -10,9 +11,13 @@ import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
 
 export default async function EmployeeDashboardPage() {
   const user = await getCurrentUser();
-  const employee = user ? getEmployeeRecordForUser(user) : null;
+  if (!user || user.role !== "employee") {
+    redirect("/login");
+  }
 
-  if (!user || !employee) {
+  const employee = getEmployeeRecordForUser(user);
+
+  if (!employee) {
     return <p className="text-sm text-muted-foreground">No employee profile found for this account.</p>;
   }
 

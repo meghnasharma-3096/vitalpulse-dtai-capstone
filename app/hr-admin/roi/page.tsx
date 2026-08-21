@@ -1,4 +1,5 @@
 import { Calculator, TriangleAlert } from "lucide-react";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getDepartments } from "@/lib/data";
 import { getAtRiskEmployees, getRoiContext } from "@/lib/subsystem-b";
@@ -7,6 +8,10 @@ import { AtRiskEmployeeTable } from "@/components/subsystem-b/at-risk-employee-t
 
 export default async function RoiPage() {
   const user = await getCurrentUser();
+  if (!user || (user.role !== "hr_admin" && user.role !== "dept_manager")) {
+    redirect("/login");
+  }
+
   const context = getRoiContext(user);
   const atRisk = getAtRiskEmployees(user);
   const departments = getDepartments(user).map(d => ({ id: d.id, name: d.name }));

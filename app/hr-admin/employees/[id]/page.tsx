@@ -59,7 +59,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
               <Radar className="size-4 text-primary" />
               Department burnout flag
             </CardTitle>
-            <CardDescription>Subsystem C — Burnout Radar</CardDescription>
+            <CardDescription>Burnout Radar</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {latestSnapshot ? (
@@ -84,7 +84,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
               <HeartPulse className="size-4 text-primary" />
               Program matches
             </CardTitle>
-            <CardDescription>Subsystem A — Wellness Matching</CardDescription>
+            <CardDescription>Wellness Matching</CardDescription>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             {employee.optedOut ? (
@@ -130,7 +130,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
             <Bell className="size-4 text-primary" />
-            Disengagement & nudge history — Subsystem B
+            Disengagement & nudge history
           </h2>
           {nudges.length === 0 ? (
             <p className="text-sm text-muted-foreground">No nudges sent yet.</p>

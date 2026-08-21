@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LineChart, ShieldCheck, Users2, UserCircle, ChevronDown, KeyRound, type LucideIcon } from "lucide-react";
+import { LineChart, ShieldCheck, Users2, UserCircle, ChevronDown, KeyRound, TriangleAlert, Mail, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,8 +32,9 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [manualOpen, setManualOpen] = useState(false);
   const [credentialsOpen, setCredentialsOpen] = useState(false);
+  const [deptManagerOpen, setDeptManagerOpen] = useState(false);
+  const [employeeOpen, setEmployeeOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -67,50 +68,37 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <RoleCard icon={LineChart} title="CFO / Exec" description="Company-wide rollup, no operational detail">
-          {cfo && (
-            <QuickLoginButton account={cfo} label={`Log in as CFO — ${cfo.name}`} loading={loadingId === cfo.id} onClick={() => loginWith({ credentialId: cfo.id })} />
-          )}
-        </RoleCard>
-
-        <RoleCard icon={ShieldCheck} title="HR Admin" description="Full company-wide access across all three subsystems">
-          {hrAdmin && (
-            <QuickLoginButton account={hrAdmin} label={`Log in as HR Admin — ${hrAdmin.name}`} loading={loadingId === hrAdmin.id} onClick={() => loginWith({ credentialId: hrAdmin.id })} />
-          )}
-        </RoleCard>
-
-        <RoleCard icon={Users2} title="Department Manager" description="Same views as HR Admin, scoped to one department">
-          <div className="flex flex-col gap-2">
-            {deptManagers.map(a => (
-              <QuickLoginButton
-                key={a.id}
-                account={a}
-                label={`${a.name} — ${a.departmentName}`}
-                loading={loadingId === a.id}
-                onClick={() => loginWith({ credentialId: a.id })}
-              />
-            ))}
-          </div>
-        </RoleCard>
-
-        <RoleCard icon={UserCircle} title="Employee" description="Sees only their own matches, nudges, and profile">
-          <div className="flex flex-col gap-2">
-            {employees.map(a => (
-              <QuickLoginButton
-                key={a.id}
-                account={a}
-                label={`${a.name}`}
-                sublabel={PERSONA_LABEL[a.id]}
-                loading={loadingId === a.id}
-                onClick={() => loginWith({ credentialId: a.id })}
-              />
-            ))}
-          </div>
-        </RoleCard>
-      </div>
-
-      {error && <p className="text-sm text-destructive text-center">{error}</p>}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Mail className="size-4 text-primary" />
+            Sign in with email
+          </CardTitle>
+          <CardDescription>Use any demo account&apos;s email and password below.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end"
+            onSubmit={e => {
+              e.preventDefault();
+              loginWith({ email, password });
+            }}
+          >
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-xs">Email</Label>
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hradmin@meridiananalytics.com" required />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-xs">Password</Label>
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={DEMO_PASSWORD} required />
+            </div>
+            <Button type="submit" disabled={loadingId === "manual"}>
+              {loadingId === "manual" ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+          {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+        </CardContent>
+      </Card>
 
       <div className="flex justify-center">
         <Button
@@ -121,7 +109,7 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
           aria-expanded={credentialsOpen}
         >
           <KeyRound className="size-3.5" />
-          {credentialsOpen ? "Hide demo credentials" : "Show demo credentials"}
+          {credentialsOpen ? "Hide demo credentials" : "Need demo credentials?"}
           <ChevronDown className={`size-3.5 transition-transform duration-200 ${credentialsOpen ? "rotate-180" : ""}`} />
         </Button>
       </div>
@@ -132,9 +120,9 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
             <CardTitle className="text-sm flex items-center gap-2">
               Demo credentials <Badge variant="outline">For demo/grading purposes</Badge>
             </CardTitle>
-            <CardDescription>Every seeded account shares the password below — use them with the manual sign-in form if you&apos;d rather not use the one-click buttons.</CardDescription>
+            <CardDescription>Every seeded account shares the password below.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             <div className="text-xs font-mono bg-background rounded-xl p-3 overflow-x-auto shadow-[var(--shadow-card)]">
               <table className="w-full text-left">
                 <thead>
@@ -155,35 +143,73 @@ export function LoginForm({ accounts }: { accounts: DemoAccount[] }) {
                 </tbody>
               </table>
             </div>
-
-            <button type="button" className="text-xs text-primary underline underline-offset-2" onClick={() => setManualOpen(o => !o)}>
-              {manualOpen ? "Hide manual sign-in" : "Sign in manually with email + password"}
-            </button>
-
-            {manualOpen && (
-              <form
-                className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end"
-                onSubmit={e => {
-                  e.preventDefault();
-                  loginWith({ email, password });
-                }}
-              >
-                <div className="space-y-1">
-                  <Label htmlFor="email" className="text-xs">Email</Label>
-                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hradmin@meridiananalytics.com" required />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="password" className="text-xs">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={DEMO_PASSWORD} required />
-                </div>
-                <Button type="submit" disabled={loadingId === "manual"}>
-                  {loadingId === "manual" ? "Signing in…" : "Sign in"}
-                </Button>
-              </form>
-            )}
           </CardContent>
         </Card>
       )}
+
+      <div className="rounded-xl bg-accent px-5 py-4 flex items-start gap-3">
+        <TriangleAlert className="size-5 text-accent-foreground mt-0.5 shrink-0" />
+        <p className="text-sm font-semibold text-accent-foreground">
+          Recommended: sign in using a role below. Manual credentials are for reference only.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <RoleCard icon={LineChart} title="CFO / Exec" description="Company-wide rollup, no operational detail">
+          {cfo && (
+            <QuickLoginButton account={cfo} label={`Log in as CFO — ${cfo.name}`} loading={loadingId === cfo.id} onClick={() => loginWith({ credentialId: cfo.id })} />
+          )}
+        </RoleCard>
+
+        <RoleCard icon={ShieldCheck} title="HR Admin" description="Full company-wide access across the platform">
+          {hrAdmin && (
+            <QuickLoginButton account={hrAdmin} label={`Log in as HR Admin — ${hrAdmin.name}`} loading={loadingId === hrAdmin.id} onClick={() => loginWith({ credentialId: hrAdmin.id })} />
+          )}
+        </RoleCard>
+
+        <CollapsibleRoleGroup
+          icon={Users2}
+          title="Department Manager"
+          summary={`${deptManagers.length} managers`}
+          open={deptManagerOpen}
+          onToggle={() => setDeptManagerOpen(o => !o)}
+        >
+          <p className="text-sm text-muted-foreground mb-3">Same views as HR Admin, scoped to one department</p>
+          <div className="flex flex-col gap-2">
+            {deptManagers.map(a => (
+              <QuickLoginButton
+                key={a.id}
+                account={a}
+                label={`${a.name} — ${a.departmentName}`}
+                loading={loadingId === a.id}
+                onClick={() => loginWith({ credentialId: a.id })}
+              />
+            ))}
+          </div>
+        </CollapsibleRoleGroup>
+
+        <CollapsibleRoleGroup
+          icon={UserCircle}
+          title="Employee"
+          summary={`${employees.length} personas`}
+          open={employeeOpen}
+          onToggle={() => setEmployeeOpen(o => !o)}
+        >
+          <p className="text-sm text-muted-foreground mb-3">Sees only their own matches, nudges, and profile</p>
+          <div className="flex flex-col gap-2">
+            {employees.map(a => (
+              <QuickLoginButton
+                key={a.id}
+                account={a}
+                label={`${a.name}`}
+                sublabel={PERSONA_LABEL[a.id]}
+                loading={loadingId === a.id}
+                onClick={() => loginWith({ credentialId: a.id })}
+              />
+            ))}
+          </div>
+        </CollapsibleRoleGroup>
+      </div>
     </div>
   );
 }
@@ -211,6 +237,41 @@ function RoleCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function CollapsibleRoleGroup({
+  icon: Icon,
+  title,
+  summary,
+  open,
+  onToggle,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  summary: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="hover:shadow-[var(--shadow-card-hover)]">
+      <button type="button" className="w-full text-left" onClick={onToggle} aria-expanded={open}>
+        <CardHeader className={open ? "pb-3" : ""}>
+          <CardTitle className="flex items-center justify-between gap-2.5 text-base">
+            <span className="flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-full bg-primary-tint text-primary">
+                <Icon className="size-4" />
+              </span>
+              {title} — {summary}
+            </span>
+            <ChevronDown className={`size-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          </CardTitle>
+        </CardHeader>
+      </button>
+      {open && <CardContent>{children}</CardContent>}
     </Card>
   );
 }
