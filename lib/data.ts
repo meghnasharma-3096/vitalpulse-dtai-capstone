@@ -83,10 +83,29 @@ const store = {
   employees: structuredClone(employeesSeed) as Employee[],
   departments: structuredClone(departmentsSeed) as Department[],
   wellnessPrograms: structuredClone(wellnessProgramsSeed) as WellnessProgram[],
-  nudges: structuredClone(nudgesSeed) as Nudge[],
   burnoutSnapshots: structuredClone(burnoutSnapshotsSeed) as BurnoutSnapshot[],
   interventions: structuredClone(interventionsSeed) as Intervention[],
 };
+
+// Persisted to disk rather than kept in `store` above: Route Handlers, Server Actions,
+// and Server Components can end up on separate module instances of this file within the
+// same server process (confirmed for the sim clock and Subsystem C's interventions store —
+// same fix applied here). An in-memory array would let a sent nudge, a dismiss, or feedback
+// silently vanish depending on which module instance served the next read.
+const NUDGES_STATE_PATH = path.join(process.cwd(), "data", "nudges-state.json");
+
+function readNudges(): Nudge[] {
+  try {
+    const raw = fs.readFileSync(NUDGES_STATE_PATH, "utf-8");
+    return JSON.parse(raw) as Nudge[];
+  } catch {
+    return structuredClone(nudgesSeed) as Nudge[];
+  }
+}
+
+function writeNudges(list: Nudge[]): void {
+  fs.writeFileSync(NUDGES_STATE_PATH, JSON.stringify(list, null, 2) + "\n", "utf-8");
+}
 
 const SIMULATION_ANCHOR = new Date("2026-08-19T00:00:00Z");
 
@@ -259,24 +278,25 @@ export function getNudgesForEmployee(employeeId: string, user: CurrentUser | nul
     (user.role === "employee" && user.employeeId === employeeId);
   if (!authorized) return [];
 
-  return store.nudges.filter(n => n.employeeId === employeeId).sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
+  return readNudges().filter(n => n.employeeId === employeeId).sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
 }
 
 export function getAllNudges(user: CurrentUser | null): Nudge[] {
   requireUser(user);
+  const nudges = readNudges();
   const optedOutIds = new Set(store.employees.filter(e => e.optedOut).map(e => e.id));
   if (user.role === "hr_admin") {
-    return store.nudges.filter(n => !optedOutIds.has(n.employeeId));
+    return nudges.filter(n => !optedOutIds.has(n.employeeId));
   }
   if (user.role === "dept_manager") {
     const deptEmployeeIds = new Set(store.employees.filter(e => e.departmentId === user.departmentId).map(e => e.id));
-    return store.nudges.filter(n => deptEmployeeIds.has(n.employeeId) && !optedOutIds.has(n.employeeId));
+    return nudges.filter(n => deptEmployeeIds.has(n.employeeId) && !optedOutIds.has(n.employeeId));
   }
   return [];
 }
 
 export function getNudgeById(id: string): Nudge | null {
-  return store.nudges.find(n => n.id === id) ?? null;
+  return readNudges().find(n => n.id === id) ?? null;
 }
 
 export function updateNudgeStatus(
@@ -285,12 +305,14 @@ export function updateNudgeStatus(
   user: CurrentUser | null
 ): { ok: boolean; error?: string } {
   requireUser(user);
-  const nudge = store.nudges.find(n => n.id === nudgeId);
+  const list = readNudges();
+  const nudge = list.find(n => n.id === nudgeId);
   if (!nudge) return { ok: false, error: "Nudge not found." };
   if (user.role !== "employee" || user.employeeId !== nudge.employeeId) {
     return { ok: false, error: "Only the recipient can act on this nudge." };
   }
   nudge.status = status;
+  writeNudges(list);
   return { ok: true };
 }
 
@@ -300,21 +322,25 @@ export function submitNudgeFeedback(
   user: CurrentUser | null
 ): { ok: boolean; error?: string } {
   requireUser(user);
-  const nudge = store.nudges.find(n => n.id === nudgeId);
+  const list = readNudges();
+  const nudge = list.find(n => n.id === nudgeId);
   if (!nudge) return { ok: false, error: "Nudge not found." };
   if (user.role !== "employee" || user.employeeId !== nudge.employeeId) {
     return { ok: false, error: "Only the recipient can give feedback on this nudge." };
   }
   nudge.feedback = feedback;
+  writeNudges(list);
   return { ok: true };
 }
 
 export function addNudge(nudge: Nudge): void {
-  store.nudges.unshift(nudge);
+  const list = readNudges();
+  list.unshift(nudge);
+  writeNudges(list);
 }
 
 export function nextNudgeId(): string {
-  const max = store.nudges.reduce((m, n) => {
+  const max = readNudges().reduce((m, n) => {
     const num = Number(n.id.replace("NUDGE-", ""));
     return Number.isFinite(num) ? Math.max(m, num) : m;
   }, 0);

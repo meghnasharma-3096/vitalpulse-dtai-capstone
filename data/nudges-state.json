@@ -1,0 +1,290 @@
+[
+  {
+    "id": "NUDGE-0001",
+    "employeeId": "EMP-0020",
+    "type": "reengagement",
+    "content": "You crushed Q2 targets, Rohan — your CultFit streak has lapsed for 6 weeks. Jump back in this week?",
+    "sentDate": "2026-07-15",
+    "status": "dismissed",
+    "feedback": "not_helpful"
+  },
+  {
+    "id": "NUDGE-0002",
+    "employeeId": "EMP-0020",
+    "type": "new_program",
+    "content": "Based on your past fitness engagement, MindEase's new performance-coaching track might fit your schedule.",
+    "sentDate": "2026-07-26",
+    "status": "dismissed",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0003",
+    "employeeId": "EMP-0020",
+    "type": "check_in",
+    "content": "Quick pulse check, Rohan — how's the pace been these last few weeks?",
+    "sentDate": "2026-08-06",
+    "status": "dismissed",
+    "feedback": "not_helpful"
+  },
+  {
+    "id": "NUDGE-0004",
+    "employeeId": "EMP-0042",
+    "type": "check_in",
+    "content": "Hi Priya, just checking in — no pressure to respond, we're here if you need anything this week.",
+    "sentDate": "2026-08-09",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0005",
+    "employeeId": "EMP-0042",
+    "type": "check_in",
+    "content": "We noticed things have been heavy lately, Priya. Want to grab 15 minutes with HR, no agenda?",
+    "sentDate": "2026-07-22",
+    "status": "acted_on",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0006",
+    "employeeId": "EMP-0002",
+    "type": "new_program",
+    "content": "Welcome back, Ananya! The New Parent Support Circle meets on flexible evening slots if that works better right now.",
+    "sentDate": "2026-08-04",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0007",
+    "employeeId": "EMP-0002",
+    "type": "check_in",
+    "content": "Easing back in can take time — want us to hold off on program suggestions for a couple weeks?",
+    "sentDate": "2026-07-10",
+    "status": "acted_on",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0008",
+    "employeeId": "EMP-0057",
+    "type": "new_program",
+    "content": "Karan, your team's been active in the Yoga & Flexibility Circuit — spots just opened up if you'd like to join.",
+    "sentDate": "2026-08-01",
+    "status": "acted_on",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0009",
+    "employeeId": "EMP-0088",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Alisha — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-07-21",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0010",
+    "employeeId": "EMP-0090",
+    "type": "check_in",
+    "content": "Quick check-in, Nisha — how are you feeling about your workload this week?",
+    "sentDate": "2026-08-11",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0011",
+    "employeeId": "EMP-0027",
+    "type": "new_program",
+    "content": "Vikram, based on your recent activity we think you'd like NutriWell Diet Coaching.",
+    "sentDate": "2026-06-20",
+    "status": "dismissed",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0012",
+    "employeeId": "EMP-0053",
+    "type": "check_in",
+    "content": "Quick check-in, Riya — how are you feeling about your workload this week?",
+    "sentDate": "2026-07-16",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0013",
+    "employeeId": "EMP-0028",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Riya — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-07-30",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0014",
+    "employeeId": "EMP-0043",
+    "type": "check_in",
+    "content": "Quick check-in, Alisha — how are you feeling about your workload this week?",
+    "sentDate": "2026-06-24",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0015",
+    "employeeId": "EMP-0024",
+    "type": "new_program",
+    "content": "Ritika, based on your recent activity we think you'd like Budgeting & Debt Clinic.",
+    "sentDate": "2026-07-29",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0016",
+    "employeeId": "EMP-0055",
+    "type": "new_program",
+    "content": "Kabir, based on your recent activity we think you'd like CultFit Corporate Membership.",
+    "sentDate": "2026-08-02",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0017",
+    "employeeId": "EMP-0076",
+    "type": "new_program",
+    "content": "Ananya, based on your recent activity we think you'd like Ergonomics & Desk Health.",
+    "sentDate": "2026-08-18",
+    "status": "dismissed",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0018",
+    "employeeId": "EMP-0054",
+    "type": "new_program",
+    "content": "Shreya, based on your recent activity we think you'd like Nutrition for Night Shifts.",
+    "sentDate": "2026-07-22",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0019",
+    "employeeId": "EMP-0006",
+    "type": "new_program",
+    "content": "Harsh, based on your recent activity we think you'd like Ergonomics & Desk Health.",
+    "sentDate": "2026-08-14",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0020",
+    "employeeId": "EMP-0016",
+    "type": "new_program",
+    "content": "Ritika, based on your recent activity we think you'd like Yoga & Flexibility Circuit.",
+    "sentDate": "2026-07-02",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0021",
+    "employeeId": "EMP-0080",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Pooja — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-07-28",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0022",
+    "employeeId": "EMP-0102",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Sahil — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-07-25",
+    "status": "acted_on",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0023",
+    "employeeId": "EMP-0096",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Ira — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-06-21",
+    "status": "dismissed",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0024",
+    "employeeId": "EMP-0060",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Bhavna — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-08-16",
+    "status": "acted_on",
+    "feedback": "not_helpful"
+  },
+  {
+    "id": "NUDGE-0025",
+    "employeeId": "EMP-0085",
+    "type": "new_program",
+    "content": "Pallavi, based on your recent activity we think you'd like Ergonomics & Desk Health.",
+    "sentDate": "2026-07-29",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0026",
+    "employeeId": "EMP-0019",
+    "type": "new_program",
+    "content": "Naveen, based on your recent activity we think you'd like Yoga & Flexibility Circuit.",
+    "sentDate": "2026-07-03",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0027",
+    "employeeId": "EMP-0038",
+    "type": "check_in",
+    "content": "Quick check-in, Simran — how are you feeling about your workload this week?",
+    "sentDate": "2026-07-19",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0028",
+    "employeeId": "EMP-0025",
+    "type": "check_in",
+    "content": "Quick check-in, Neha — how are you feeling about your workload this week?",
+    "sentDate": "2026-08-07",
+    "status": "dismissed",
+    "feedback": "helpful"
+  },
+  {
+    "id": "NUDGE-0029",
+    "employeeId": "EMP-0102",
+    "type": "new_program",
+    "content": "Sahil, based on your recent activity we think you'd like Mindful Mornings Meditation.",
+    "sentDate": "2026-08-07",
+    "status": "sent",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0030",
+    "employeeId": "EMP-0021",
+    "type": "new_program",
+    "content": "Divya, based on your recent activity we think you'd like Yoga & Flexibility Circuit.",
+    "sentDate": "2026-08-09",
+    "status": "acted_on",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0031",
+    "employeeId": "EMP-0085",
+    "type": "check_in",
+    "content": "Quick check-in, Pallavi — how are you feeling about your workload this week?",
+    "sentDate": "2026-06-23",
+    "status": "dismissed",
+    "feedback": null
+  },
+  {
+    "id": "NUDGE-0032",
+    "employeeId": "EMP-0034",
+    "type": "reengagement",
+    "content": "We miss seeing you around, Pooja — your last program check-in was a while back. Anything we can do to make it easier to jump back in?",
+    "sentDate": "2026-06-26",
+    "status": "sent",
+    "feedback": null
+  }
+]
