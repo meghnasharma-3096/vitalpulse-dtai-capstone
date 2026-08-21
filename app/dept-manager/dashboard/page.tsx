@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { Users2, Wallet, ShieldAlert, TriangleAlert, Info } from "lucide-react";
+import { Users2, Wallet, ShieldAlert, TriangleAlert, Info, LineChart as LineChartIcon, Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth-server";
 import { getDepartments, getBurnoutSnapshots } from "@/lib/data";
 import { getAtRiskEmployees, getDisengagementDistribution } from "@/lib/subsystem-b";
+import { getDepartmentBurnoutSummaries, getDepartmentTrendSeries, getSubsystemInterventions } from "@/lib/subsystem-c";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DisengagementDistributionChart } from "@/components/subsystem-b/disengagement-distribution-chart";
 import { AtRiskEmployeeTable } from "@/components/subsystem-b/at-risk-employee-table";
+import { DepartmentTrendChart } from "@/components/subsystem-c/department-trend-chart";
+import { BurnoutDepartmentCards } from "@/components/subsystem-c/burnout-department-cards";
 import { RiskBadge, riskLevelFromScore } from "@/components/shared/risk-badge";
 
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
@@ -18,6 +21,9 @@ export default async function DeptManagerDashboardPage() {
   const distribution = getDisengagementDistribution(user);
   const snapshots = getBurnoutSnapshots(user).sort((a, b) => (a.weekOf < b.weekOf ? 1 : -1));
   const latestSnapshot = snapshots[0];
+
+  const burnoutSummaries = getDepartmentBurnoutSummaries(user);
+  const trendSeries = getDepartmentTrendSeries(user);
 
   if (!dept) {
     return <p className="text-sm text-muted-foreground">No department scope found for this account.</p>;
@@ -67,6 +73,31 @@ export default async function DeptManagerDashboardPage() {
         </Card>
       </div>
 
+      {/* Scoped Subsystem C: Burnout Risk & Intervention Card */}
+      <div className="space-y-3">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <ShieldAlert className="size-4 text-primary" />
+          Team Well-Being & Intervention Brief
+        </h2>
+        <BurnoutDepartmentCards departments={burnoutSummaries} />
+      </div>
+
+      {/* Scoped Subsystem C: Historical Trend */}
+      {trendSeries.weeks.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LineChartIcon className="size-4 text-primary" />
+              {dept.name} — Burnout Trajectory Over Time
+            </CardTitle>
+            <CardDescription>Historical burnout risk score over consecutive tracking weeks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DepartmentTrendChart series={trendSeries} />
+          </CardContent>
+        </Card>
+      )}
+
       <DisengagementDistributionChart distribution={distribution} />
 
       <div>
@@ -85,8 +116,9 @@ export default async function DeptManagerDashboardPage() {
           </CardTitle>
           <CardDescription>The same underlying data, scoped views HR Admin also uses</CardDescription>
         </CardHeader>
-        <CardContent className="flex gap-3 text-sm">
+        <CardContent className="flex gap-3 text-sm flex-wrap">
           <Link href="/hr-admin/employees" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">Full employee directory</Link>
+          <Link href="/hr-admin/programs" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">Wellness programs</Link>
           <Link href="/hr-admin/roi" className="rounded-full bg-muted px-3.5 py-2 hover:bg-primary-tint hover:text-primary hover:shadow-[var(--shadow-glow)] transition-all duration-200">ROI calculator</Link>
         </CardContent>
       </Card>
