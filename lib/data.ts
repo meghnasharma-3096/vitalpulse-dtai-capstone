@@ -1,4 +1,6 @@
 import "server-only";
+import fs from "node:fs";
+import path from "node:path";
 import employeesSeed from "@/data/employees.json";
 import departmentsSeed from "@/data/departments.json";
 import wellnessProgramsSeed from "@/data/wellness-programs.json";
@@ -84,14 +86,34 @@ const store = {
   nudges: structuredClone(nudgesSeed) as Nudge[],
   burnoutSnapshots: structuredClone(burnoutSnapshotsSeed) as BurnoutSnapshot[],
   interventions: structuredClone(interventionsSeed) as Intervention[],
-  simulatedWeekOffset: 0,
 };
 
 const SIMULATION_ANCHOR = new Date("2026-08-19T00:00:00Z");
 
+// Persisted to disk (not the in-memory `store` above) because Route Handlers and
+// Server Actions can end up on separate module instances of this file within the
+// same server process — an in-memory field silently desyncs between them (confirmed
+// in both `next dev` and a production `next build && next start`). Reading/writing a
+// file every call sidesteps that, at the cost of a real (small) disk I/O per call.
+const SIM_STATE_PATH = path.join(process.cwd(), "data", "sim-state.json");
+
+function readSimWeekOffset(): number {
+  try {
+    const raw = fs.readFileSync(SIM_STATE_PATH, "utf-8");
+    const parsed = JSON.parse(raw) as { weekOffset?: number };
+    return typeof parsed.weekOffset === "number" ? parsed.weekOffset : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeSimWeekOffset(offset: number): void {
+  fs.writeFileSync(SIM_STATE_PATH, JSON.stringify({ weekOffset: offset }, null, 2) + "\n", "utf-8");
+}
+
 export function getSimulatedDate(): Date {
   const d = new Date(SIMULATION_ANCHOR);
-  d.setUTCDate(d.getUTCDate() + store.simulatedWeekOffset * 7);
+  d.setUTCDate(d.getUTCDate() + readSimWeekOffset() * 7);
   return d;
 }
 
@@ -104,7 +126,7 @@ export function advanceSimulatedWeek(user: CurrentUser | null): { ok: boolean; d
   if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) {
     return { ok: false, error: "Only HR Admin or CFO can advance the simulated clock." };
   }
-  store.simulatedWeekOffset += 1;
+  writeSimWeekOffset(readSimWeekOffset() + 1);
   return { ok: true, date: getSimulatedDateISO() };
 }
 
