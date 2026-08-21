@@ -22,8 +22,10 @@ import type { DepartmentBurnoutSummary } from "@/lib/subsystem-c";
 
 export function BurnoutDepartmentCards({
   departments,
+  readOnly = false,
 }: {
   departments: DepartmentBurnoutSummary[];
+  readOnly?: boolean;
 }) {
   const [selectedDept, setSelectedDept] = useState<DepartmentBurnoutSummary | null>(null);
 
@@ -125,12 +127,17 @@ export function BurnoutDepartmentCards({
 
                 <div className="pt-1">
                   <Button
-                    variant={hasPending ? "default" : "outline"}
+                    variant={!readOnly && hasPending ? "default" : "outline"}
                     size="sm"
                     className="w-full rounded-full text-xs font-medium"
                     onClick={() => setSelectedDept(dept)}
                   >
-                    {hasPending ? (
+                    {readOnly ? (
+                      <>
+                        <ArrowUpRight className="size-3.5 mr-1.5" />
+                        View Details
+                      </>
+                    ) : hasPending ? (
                       <>
                         <Sparkles className="size-3.5 mr-1.5" />
                         Review Pending Brief
@@ -162,6 +169,7 @@ export function BurnoutDepartmentCards({
           onOpenChange={(open) => {
             if (!open) setSelectedDept(null);
           }}
+          readOnly={readOnly}
         />
       )}
     </>

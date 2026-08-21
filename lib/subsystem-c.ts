@@ -11,6 +11,7 @@ import {
   type Intervention,
   getDepartments,
   getAllDepartmentsUnscoped,
+  getSimulatedDate,
 } from "@/lib/data";
 import { generateInterventionBrief } from "@/lib/llm";
 import { riskLevelFromScore, type RiskLevel } from "@/components/shared/risk-badge";
@@ -98,6 +99,10 @@ export function getInterventionById(id: string, user: CurrentUser | null): Inter
  */
 export function getDepartmentBurnoutSummaries(user: CurrentUser | null): DepartmentBurnoutSummary[] {
   requireUser(user);
+  if (user.role !== "hr_admin" && user.role !== "cfo" && user.role !== "dept_manager") {
+    return [];
+  }
+
   const allDepts = (user.role === "dept_manager"
     ? departmentsSeed.filter((d) => d.id === user.departmentId)
     : departmentsSeed) as Department[];
@@ -355,8 +360,8 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
   if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) return 0;
 
   let count = 0;
-  const now = new Date().getTime();
-  const SLA_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in simulated/wall clock
+  const now = getSimulatedDate().getTime();
+  const SLA_MS = 7 * 24 * 60 * 60 * 1000; // 7 simulated days
 
   for (const item of interventionsStore) {
     if (item.status === "pending") {
@@ -365,7 +370,7 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
         item.status = "escalated";
         item.actedBy = "system (auto-escalation)";
         item.escalationReason = "Auto-escalated: pending longer than SLA threshold without HR action.";
-        item.timestamp = new Date().toISOString();
+        item.timestamp = getSimulatedDate().toISOString();
         count++;
       }
     }

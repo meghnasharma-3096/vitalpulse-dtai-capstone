@@ -15,9 +15,10 @@ import { InterventionAuditTable } from "@/components/subsystem-c/intervention-au
 
 export default async function BurnoutRadarPage() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "hr_admin") {
+  if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) {
     redirect("/login");
   }
+  const readOnly = user.role === "cfo";
 
   const departments = getDepartmentBurnoutSummaries(user);
   const trendSeries = getDepartmentTrendSeries(user);
@@ -114,7 +115,7 @@ export default async function BurnoutRadarPage() {
           <Radar className="size-4 text-primary" />
           Department Burnout Overview
         </h2>
-        <BurnoutDepartmentCards departments={departments} />
+        <BurnoutDepartmentCards departments={departments} readOnly={readOnly} />
       </div>
 
       {/* Recharts Historical Trend Line Chart */}
@@ -144,7 +145,7 @@ export default async function BurnoutRadarPage() {
             Mandatory Human Sign-Off Logged
           </Badge>
         </div>
-        <InterventionAuditTable interventions={interventions} departments={departments} />
+        <InterventionAuditTable interventions={interventions} departments={departments} readOnly={readOnly} />
       </div>
     </div>
   );

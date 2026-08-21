@@ -26,9 +26,11 @@ import { checkAutoEscalationsAction } from "@/app/actions/interventions";
 export function InterventionAuditTable({
   interventions,
   departments,
+  readOnly = false,
 }: {
   interventions: Intervention[];
   departments: DepartmentBurnoutSummary[];
+  readOnly?: boolean;
 }) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deptFilter, setDeptFilter] = useState<string>("all");
@@ -193,7 +195,7 @@ export function InterventionAuditTable({
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
-                          variant={isPending ? "default" : "outline"}
+                          variant={!readOnly && isPending ? "default" : "outline"}
                           size="sm"
                           className="text-xs h-7 rounded-full"
                           onClick={() => {
@@ -202,7 +204,7 @@ export function InterventionAuditTable({
                             }
                           }}
                         >
-                          {isPending ? "Review" : "View"}
+                          {!readOnly && isPending ? "Review" : "View"}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -222,6 +224,7 @@ export function InterventionAuditTable({
           onOpenChange={(open) => {
             if (!open) setActiveIntervention(null);
           }}
+          readOnly={readOnly}
         />
       )}
     </>
