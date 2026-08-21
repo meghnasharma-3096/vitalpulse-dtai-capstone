@@ -175,9 +175,9 @@ export function InterventionAuditTable({
                         {item.actedBy ?? "—"}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {new Date(item.timestamp).toLocaleDateString()}{" "}
+                        {new Date(item.timestamp).toLocaleDateString("en-GB")}{" "}
                         <span className="opacity-70">
-                          {new Date(item.timestamp).toLocaleTimeString([], {
+                          {new Date(item.timestamp).toLocaleTimeString("en-GB", {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}

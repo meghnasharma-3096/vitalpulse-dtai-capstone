@@ -363,6 +363,7 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
       const itemTime = new Date(item.timestamp).getTime();
       if (now - itemTime > SLA_MS) {
         item.status = "escalated";
+        item.actedBy = "system (auto-escalation)";
         item.escalationReason = "Auto-escalated: pending longer than SLA threshold without HR action.";
         item.timestamp = new Date().toISOString();
         count++;
