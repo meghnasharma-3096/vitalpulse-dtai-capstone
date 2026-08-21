@@ -1,0 +1,56 @@
+[
+  {
+    "id": "INT-001",
+    "departmentId": "DEPT-CS",
+    "aiDraftedBrief": "Customer Success has trended upward in burnout risk for 3 consecutive weeks, driven by sustained after-hours ticket volume. Recommend temporary staffing support and a review of on-call rotation.",
+    "status": "pending",
+    "actedBy": null,
+    "timestamp": "2026-08-17T09:15:00Z",
+    "escalationReason": null
+  },
+  {
+    "id": "INT-002",
+    "departmentId": "DEPT-SALES",
+    "aiDraftedBrief": "Sales burnout risk is rising alongside quarter-end quota pressure. Recommend a manager check-in cadence and deferring optional training modules until next quarter.",
+    "status": "approved",
+    "actedBy": "EMP-0019",
+    "timestamp": "2026-08-10T14:02:00Z",
+    "escalationReason": null
+  },
+  {
+    "id": "INT-003",
+    "departmentId": "DEPT-HR",
+    "aiDraftedBrief": "HR risk score has stayed elevated but flat; no acute trigger identified. Recommend monitoring only, no intervention this cycle.",
+    "status": "rejected",
+    "actedBy": "EMP-0088",
+    "timestamp": "2026-08-04T11:40:00Z",
+    "escalationReason": null
+  },
+  {
+    "id": "INT-004",
+    "departmentId": "DEPT-CS",
+    "aiDraftedBrief": "Customer Success risk has now exceeded the high-risk threshold for 2 consecutive weeks without HR action. Recommend escalating to leadership for immediate resourcing review.",
+    "status": "escalated",
+    "actedBy": null,
+    "timestamp": "2026-08-18T08:00:00Z",
+    "escalationReason": "Pending longer than the 5-business-day auto-escalation threshold with no HR action taken."
+  },
+  {
+    "id": "INT-005",
+    "departmentId": "DEPT-MKT",
+    "aiDraftedBrief": "Marketing's burnout risk has improved for 3 consecutive weeks following the campaign crunch. Recommend closing this watch item and returning to standard monitoring.",
+    "status": "approved",
+    "actedBy": "EMP-0041",
+    "timestamp": "2026-07-30T16:30:00Z",
+    "escalationReason": null
+  },
+  {
+    "id": "INT-006",
+    "departmentId": "DEPT-ENG",
+    "aiDraftedBrief": "Engineering risk is stable within normal range. No intervention recommended this cycle.",
+    "status": "pending",
+    "actedBy": null,
+    "timestamp": "2026-08-15T10:05:00Z",
+    "escalationReason": null
+  }
+]

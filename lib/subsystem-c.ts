@@ -1,4 +1,6 @@
 import "server-only";
+import fs from "node:fs";
+import path from "node:path";
 import interventionsSeed from "@/data/interventions.json";
 import burnoutSnapshotsSeed from "@/data/burnout-snapshots.json";
 import departmentsSeed from "@/data/departments.json";
@@ -37,15 +39,34 @@ export interface WeeklyTrendPoint {
   [deptId: string]: string | number | undefined;
 }
 
-// In-memory interventions store for Subsystem C (supports prototype mutations)
-const interventionsStore: Intervention[] = structuredClone(interventionsSeed) as Intervention[];
+// Persisted to disk rather than an in-memory array: Route Handlers, Server Actions, and
+// Server Components can end up on separate module instances of this file within the same
+// server process (confirmed in both `next dev` and a production `next build && next start`
+// — see lib/data.ts's getSimulatedDate for the same fix applied to the sim clock). An
+// in-memory array here would let an approve/reject/escalate silently vanish from the audit
+// trail depending on which module instance handled the read — unacceptable for the
+// governance feature this subsystem exists to prove out.
+const INTERVENTIONS_STATE_PATH = path.join(process.cwd(), "data", "interventions-state.json");
+
+function readInterventions(): Intervention[] {
+  try {
+    const raw = fs.readFileSync(INTERVENTIONS_STATE_PATH, "utf-8");
+    return JSON.parse(raw) as Intervention[];
+  } catch {
+    return structuredClone(interventionsSeed) as Intervention[];
+  }
+}
+
+function writeInterventions(list: Intervention[]): void {
+  fs.writeFileSync(INTERVENTIONS_STATE_PATH, JSON.stringify(list, null, 2) + "\n", "utf-8");
+}
 
 function requireUser(user: CurrentUser | null): asserts user is CurrentUser {
   if (!user) throw new Error("Not authenticated.");
 }
 
-function nextInterventionId(): string {
-  const max = interventionsStore.reduce((m, i) => {
+function nextInterventionId(list: Intervention[]): string {
+  const max = list.reduce((m, i) => {
     const num = Number(i.id.replace("INT-", ""));
     return Number.isFinite(num) ? Math.max(m, num) : m;
   }, 0);
@@ -76,6 +97,7 @@ export function getRecommendedTimeline(trend: string, riskScore: number): string
  */
 export function getSubsystemInterventions(user: CurrentUser | null): Intervention[] {
   requireUser(user);
+  const interventionsStore = readInterventions();
   if (user.role === "hr_admin" || user.role === "cfo") {
     return [...interventionsStore].sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   }
@@ -225,7 +247,8 @@ export function approveIntervention(
     return { ok: false, error: "Unauthorized: only HR Admin, CFO, or Department Managers can approve interventions." };
   }
 
-  const intervention = interventionsStore.find((i) => i.id === id);
+  const list = readInterventions();
+  const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
   if (user.role === "dept_manager" && intervention.departmentId !== user.departmentId) {
@@ -235,6 +258,7 @@ export function approveIntervention(
   intervention.status = "approved";
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.timestamp = new Date().toISOString();
+  writeInterventions(list);
 
   return { ok: true, intervention };
 }
@@ -252,7 +276,8 @@ export function rejectIntervention(
     return { ok: false, error: "Unauthorized: only HR Admin, CFO, or Department Managers can reject interventions." };
   }
 
-  const intervention = interventionsStore.find((i) => i.id === id);
+  const list = readInterventions();
+  const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
   if (user.role === "dept_manager" && intervention.departmentId !== user.departmentId) {
@@ -262,6 +287,7 @@ export function rejectIntervention(
   intervention.status = "rejected";
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.timestamp = new Date().toISOString();
+  writeInterventions(list);
 
   return { ok: true, intervention };
 }
@@ -279,7 +305,8 @@ export function escalateIntervention(
     return { ok: false, error: "Unauthorized to escalate." };
   }
 
-  const intervention = interventionsStore.find((i) => i.id === id);
+  const list = readInterventions();
+  const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
   if (user.role === "dept_manager" && intervention.departmentId !== user.departmentId) {
@@ -290,6 +317,7 @@ export function escalateIntervention(
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.escalationReason = reason || "Escalated for immediate leadership & budget review.";
   intervention.timestamp = new Date().toISOString();
+  writeInterventions(list);
 
   return { ok: true, intervention };
 }
@@ -337,8 +365,9 @@ export async function createDraftIntervention(
     headcount: dept.headcount,
   });
 
+  const list = readInterventions();
   const newIntervention: Intervention = {
-    id: nextInterventionId(),
+    id: nextInterventionId(list),
     departmentId,
     aiDraftedBrief,
     status: "pending", // Mandatory governance: human sign-off required
@@ -347,7 +376,8 @@ export async function createDraftIntervention(
     escalationReason: null,
   };
 
-  interventionsStore.unshift(newIntervention);
+  list.unshift(newIntervention);
+  writeInterventions(list);
   return { ok: true, intervention: newIntervention };
 }
 
@@ -362,8 +392,9 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
   let count = 0;
   const now = getSimulatedDate().getTime();
   const SLA_MS = 7 * 24 * 60 * 60 * 1000; // 7 simulated days
+  const list = readInterventions();
 
-  for (const item of interventionsStore) {
+  for (const item of list) {
     if (item.status === "pending") {
       const itemTime = new Date(item.timestamp).getTime();
       if (now - itemTime > SLA_MS) {
@@ -375,5 +406,6 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
       }
     }
   }
+  if (count > 0) writeInterventions(list);
   return count;
 }
