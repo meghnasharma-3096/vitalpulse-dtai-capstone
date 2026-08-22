@@ -96,7 +96,7 @@ export default async function DeptManagerDashboardPage() {
             </Card>
           </div>
 
-          <DisengagementDistributionChart distribution={distribution} />
+          <DisengagementDistributionChart distribution={distribution} scopeLabel={dept.name} />
 
           <div>
             <h2 className="flex items-center gap-2 text-lg font-semibold mb-3">
