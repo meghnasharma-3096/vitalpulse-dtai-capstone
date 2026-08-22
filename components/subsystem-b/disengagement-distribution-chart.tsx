@@ -5,7 +5,13 @@ import { PieChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { DisengagementDistribution } from "@/lib/subsystem-b";
 
-export function DisengagementDistributionChart({ distribution }: { distribution: DisengagementDistribution }) {
+export function DisengagementDistributionChart({
+  distribution,
+  scopeLabel = "Company-wide",
+}: {
+  distribution: DisengagementDistribution;
+  scopeLabel?: string;
+}) {
   const data = [
     { level: "Low", count: distribution.low, fill: "var(--risk-low)" },
     { level: "Medium", count: distribution.medium, fill: "var(--risk-medium)" },
@@ -18,7 +24,7 @@ export function DisengagementDistributionChart({ distribution }: { distribution:
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <PieChart className="size-4 text-primary" />
-          Company-wide disengagement risk
+          {scopeLabel} disengagement risk
         </CardTitle>
         <CardDescription>{distribution.total} employees total</CardDescription>
       </CardHeader>
