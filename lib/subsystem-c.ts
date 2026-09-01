@@ -1,6 +1,5 @@
 import "server-only";
-import fs from "node:fs";
-import path from "node:path";
+import { readState, writeState } from "@/lib/kv-store";
 import interventionsSeed from "@/data/interventions.json";
 import burnoutSnapshotsSeed from "@/data/burnout-snapshots.json";
 import departmentsSeed from "@/data/departments.json";
@@ -39,26 +38,24 @@ export interface WeeklyTrendPoint {
   [deptId: string]: string | number | undefined;
 }
 
-// Persisted to disk rather than an in-memory array: Route Handlers, Server Actions, and
-// Server Components can end up on separate module instances of this file within the same
-// server process (confirmed in both `next dev` and a production `next build && next start`
-// — see lib/data.ts's getSimulatedDate for the same fix applied to the sim clock). An
-// in-memory array here would let an approve/reject/escalate silently vanish from the audit
-// trail depending on which module instance handled the read — unacceptable for the
-// governance feature this subsystem exists to prove out.
-const INTERVENTIONS_STATE_PATH = path.join(process.cwd(), "data", "interventions-state.json");
+// Persisted via lib/kv-store rather than an in-memory array: Route Handlers, Server
+// Actions, and Server Components can end up on separate module instances of this file
+// within the same server process (confirmed in both `next dev` and a production
+// `next build && next start`), and — on the actual Vercel deployment — the filesystem
+// is read-only outside /tmp, so a raw fs write throws outright in production (confirmed
+// via a 500 on the live deployment). An in-memory array here would let an
+// approve/reject/escalate silently vanish from the audit trail depending on which
+// module instance handled the read — unacceptable for the governance feature this
+// subsystem exists to prove out.
+const INTERVENTIONS_KEY = "interventions";
+const INTERVENTIONS_FILE = "interventions-state.json";
 
-function readInterventions(): Intervention[] {
-  try {
-    const raw = fs.readFileSync(INTERVENTIONS_STATE_PATH, "utf-8");
-    return JSON.parse(raw) as Intervention[];
-  } catch {
-    return structuredClone(interventionsSeed) as Intervention[];
-  }
+async function readInterventions(): Promise<Intervention[]> {
+  return readState<Intervention[]>(INTERVENTIONS_KEY, INTERVENTIONS_FILE, structuredClone(interventionsSeed) as Intervention[]);
 }
 
-function writeInterventions(list: Intervention[]): void {
-  fs.writeFileSync(INTERVENTIONS_STATE_PATH, JSON.stringify(list, null, 2) + "\n", "utf-8");
+async function writeInterventions(list: Intervention[]): Promise<void> {
+  await writeState(INTERVENTIONS_KEY, INTERVENTIONS_FILE, list); // throws on failure — every caller below catches and surfaces it
 }
 
 function requireUser(user: CurrentUser | null): asserts user is CurrentUser {
@@ -95,9 +92,9 @@ export function getRecommendedTimeline(trend: string, riskScore: number): string
  * - dept_manager: scoped strictly to their own department
  * - employee: empty array (no access to Subsystem C)
  */
-export function getSubsystemInterventions(user: CurrentUser | null): Intervention[] {
+export async function getSubsystemInterventions(user: CurrentUser | null): Promise<Intervention[]> {
   requireUser(user);
-  const interventionsStore = readInterventions();
+  const interventionsStore = await readInterventions();
   if (user.role === "hr_admin" || user.role === "cfo") {
     return [...interventionsStore].sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   }
@@ -109,8 +106,8 @@ export function getSubsystemInterventions(user: CurrentUser | null): Interventio
   return [];
 }
 
-export function getInterventionById(id: string, user: CurrentUser | null): Intervention | null {
-  const scoped = getSubsystemInterventions(user);
+export async function getInterventionById(id: string, user: CurrentUser | null): Promise<Intervention | null> {
+  const scoped = await getSubsystemInterventions(user);
   return scoped.find((i) => i.id === id) ?? null;
 }
 
@@ -119,7 +116,7 @@ export function getInterventionById(id: string, user: CurrentUser | null): Inter
  * Departments under PRIVACY_FLOOR_HEADCOUNT (5) are flagged as suppressed,
  * and no burnout snapshots are exposed.
  */
-export function getDepartmentBurnoutSummaries(user: CurrentUser | null): DepartmentBurnoutSummary[] {
+export async function getDepartmentBurnoutSummaries(user: CurrentUser | null): Promise<DepartmentBurnoutSummary[]> {
   requireUser(user);
   if (user.role !== "hr_admin" && user.role !== "cfo" && user.role !== "dept_manager") {
     return [];
@@ -130,7 +127,7 @@ export function getDepartmentBurnoutSummaries(user: CurrentUser | null): Departm
     : departmentsSeed) as Department[];
 
   const allSnapshots = burnoutSnapshotsSeed as BurnoutSnapshot[];
-  const userInterventions = getSubsystemInterventions(user);
+  const userInterventions = await getSubsystemInterventions(user);
 
   return allDepts.map((dept) => {
     // Strict Privacy Floor Check
@@ -187,12 +184,12 @@ export function getDepartmentBurnoutSummaries(user: CurrentUser | null): Departm
  * Recharts multi-line chart expects format:
  * [{ weekOf: '2026-07-13', Engineering: 0.4, Sales: 0.41, ... }, ...]
  */
-export function getDepartmentTrendSeries(user: CurrentUser | null): {
+export async function getDepartmentTrendSeries(user: CurrentUser | null): Promise<{
   weeks: WeeklyTrendPoint[];
   departments: { id: string; name: string; color: string }[];
-} {
+}> {
   requireUser(user);
-  const scopedDepts = getDepartmentBurnoutSummaries(user).filter((d) => !d.isSuppressed);
+  const scopedDepts = (await getDepartmentBurnoutSummaries(user)).filter((d) => !d.isSuppressed);
 
   const COLOR_PALETTE = [
     "#2D6A4F", // Primary Teal
@@ -238,16 +235,16 @@ export function getDepartmentTrendSeries(user: CurrentUser | null): {
  * Human Sign-Off: Approve an intervention brief.
  * Required human decision maker action.
  */
-export function approveIntervention(
+export async function approveIntervention(
   id: string,
   user: CurrentUser | null
-): { ok: boolean; error?: string; intervention?: Intervention } {
+): Promise<{ ok: boolean; error?: string; intervention?: Intervention }> {
   requireUser(user);
   if (user.role !== "hr_admin" && user.role !== "cfo" && user.role !== "dept_manager") {
     return { ok: false, error: "Unauthorized: only HR Admin, CFO, or Department Managers can approve interventions." };
   }
 
-  const list = readInterventions();
+  const list = await readInterventions();
   const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
@@ -258,7 +255,11 @@ export function approveIntervention(
   intervention.status = "approved";
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.timestamp = new Date().toISOString();
-  writeInterventions(list);
+  try {
+    await writeInterventions(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the approval." };
+  }
 
   return { ok: true, intervention };
 }
@@ -267,16 +268,16 @@ export function approveIntervention(
  * Human Sign-Off: Reject an intervention brief.
  * Required human decision maker action.
  */
-export function rejectIntervention(
+export async function rejectIntervention(
   id: string,
   user: CurrentUser | null
-): { ok: boolean; error?: string; intervention?: Intervention } {
+): Promise<{ ok: boolean; error?: string; intervention?: Intervention }> {
   requireUser(user);
   if (user.role !== "hr_admin" && user.role !== "cfo" && user.role !== "dept_manager") {
     return { ok: false, error: "Unauthorized: only HR Admin, CFO, or Department Managers can reject interventions." };
   }
 
-  const list = readInterventions();
+  const list = await readInterventions();
   const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
@@ -287,7 +288,11 @@ export function rejectIntervention(
   intervention.status = "rejected";
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.timestamp = new Date().toISOString();
-  writeInterventions(list);
+  try {
+    await writeInterventions(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the rejection." };
+  }
 
   return { ok: true, intervention };
 }
@@ -295,17 +300,17 @@ export function rejectIntervention(
 /**
  * Human Sign-Off: Escalate an intervention brief to executive leadership.
  */
-export function escalateIntervention(
+export async function escalateIntervention(
   id: string,
   reason: string,
   user: CurrentUser | null
-): { ok: boolean; error?: string; intervention?: Intervention } {
+): Promise<{ ok: boolean; error?: string; intervention?: Intervention }> {
   requireUser(user);
   if (user.role !== "hr_admin" && user.role !== "cfo" && user.role !== "dept_manager") {
     return { ok: false, error: "Unauthorized to escalate." };
   }
 
-  const list = readInterventions();
+  const list = await readInterventions();
   const intervention = list.find((i) => i.id === id);
   if (!intervention) return { ok: false, error: "Intervention not found." };
 
@@ -317,7 +322,11 @@ export function escalateIntervention(
   intervention.actedBy = user.employeeId ?? user.name;
   intervention.escalationReason = reason || "Escalated for immediate leadership & budget review.";
   intervention.timestamp = new Date().toISOString();
-  writeInterventions(list);
+  try {
+    await writeInterventions(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the escalation." };
+  }
 
   return { ok: true, intervention };
 }
@@ -365,7 +374,7 @@ export async function createDraftIntervention(
     headcount: dept.headcount,
   });
 
-  const list = readInterventions();
+  const list = await readInterventions();
   const newIntervention: Intervention = {
     id: nextInterventionId(list),
     departmentId,
@@ -377,7 +386,11 @@ export async function createDraftIntervention(
   };
 
   list.unshift(newIntervention);
-  writeInterventions(list);
+  try {
+    await writeInterventions(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the drafted intervention." };
+  }
   return { ok: true, intervention: newIntervention };
 }
 
@@ -386,13 +399,14 @@ export async function createDraftIntervention(
  * Any pending intervention exceeding SLA threshold is marked as escalated
  * so leadership/CFO can intervene.
  */
-export function checkAutoEscalations(user: CurrentUser | null): number {
-  if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) return 0;
+export async function checkAutoEscalations(user: CurrentUser | null): Promise<{ ok: boolean; escalatedCount: number; error?: string }> {
+  if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) return { ok: true, escalatedCount: 0 };
 
   let count = 0;
-  const now = getSimulatedDate().getTime();
+  const simulatedNow = await getSimulatedDate();
+  const now = simulatedNow.getTime();
   const SLA_MS = 7 * 24 * 60 * 60 * 1000; // 7 simulated days
-  const list = readInterventions();
+  const list = await readInterventions();
 
   for (const item of list) {
     if (item.status === "pending") {
@@ -401,11 +415,17 @@ export function checkAutoEscalations(user: CurrentUser | null): number {
         item.status = "escalated";
         item.actedBy = "system (auto-escalation)";
         item.escalationReason = "Auto-escalated: pending longer than SLA threshold without HR action.";
-        item.timestamp = getSimulatedDate().toISOString();
+        item.timestamp = simulatedNow.toISOString();
         count++;
       }
     }
   }
-  if (count > 0) writeInterventions(list);
-  return count;
+  if (count > 0) {
+    try {
+      await writeInterventions(list);
+    } catch (err) {
+      return { ok: false, escalatedCount: 0, error: err instanceof Error ? err.message : "Failed to save auto-escalations." };
+    }
+  }
+  return { ok: true, escalatedCount: count };
 }

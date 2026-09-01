@@ -20,9 +20,9 @@ export default async function BurnoutRadarPage() {
   }
   const readOnly = user.role === "cfo";
 
-  const departments = getDepartmentBurnoutSummaries(user);
-  const trendSeries = getDepartmentTrendSeries(user);
-  const interventions = getSubsystemInterventions(user);
+  const departments = await getDepartmentBurnoutSummaries(user);
+  const trendSeries = await getDepartmentTrendSeries(user);
+  const interventions = await getSubsystemInterventions(user);
 
   const suppressedDepartments = departments.filter((d) => d.isSuppressed);
   const eligibleDepartments = departments.filter((d) => !d.isSuppressed);

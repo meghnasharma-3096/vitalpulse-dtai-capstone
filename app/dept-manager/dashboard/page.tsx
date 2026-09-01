@@ -26,14 +26,14 @@ export default async function DeptManagerDashboardPage() {
 
   const departments = getDepartments(user); // already scoped to the manager's own department
   const dept = departments[0];
-  const atRisk = getAtRiskEmployees(user);
+  const atRisk = await getAtRiskEmployees(user);
   const distribution = getDisengagementDistribution(user);
   const snapshots = getBurnoutSnapshots(user).sort((a, b) => (a.weekOf < b.weekOf ? 1 : -1));
   const latestSnapshot = snapshots[0];
-  const programs = getProgramCatalogForDepartment(user);
+  const programs = await getProgramCatalogForDepartment(user);
 
-  const burnoutSummaries = getDepartmentBurnoutSummaries(user);
-  const trendSeries = getDepartmentTrendSeries(user);
+  const burnoutSummaries = await getDepartmentBurnoutSummaries(user);
+  const trendSeries = await getDepartmentTrendSeries(user);
 
   if (!dept) {
     return <p className="text-sm text-muted-foreground">No department scope found for this account.</p>;

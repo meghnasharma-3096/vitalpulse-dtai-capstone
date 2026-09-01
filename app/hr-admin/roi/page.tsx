@@ -13,7 +13,7 @@ export default async function RoiPage() {
   }
 
   const context = getRoiContext(user);
-  const atRisk = getAtRiskEmployees(user);
+  const atRisk = await getAtRiskEmployees(user);
   const departments = getDepartments(user).map(d => ({ id: d.id, name: d.name }));
 
   return (

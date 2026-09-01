@@ -30,12 +30,10 @@ export interface AtRiskEmployee extends Employee {
   latestNudge: Nudge | null;
 }
 
-export function getAtRiskEmployees(user: CurrentUser | null): AtRiskEmployee[] {
-  return getEmployees(user)
-    .filter(e => !e.optedOut)
-    .map(e => enrichEmployee(e, user))
-    .filter(e => e.riskLevel !== "low")
-    .sort((a, b) => b.disengagementRiskScore - a.disengagementRiskScore);
+export async function getAtRiskEmployees(user: CurrentUser | null): Promise<AtRiskEmployee[]> {
+  const candidates = getEmployees(user).filter(e => !e.optedOut);
+  const enriched = await Promise.all(candidates.map(e => enrichEmployee(e, user)));
+  return enriched.filter(e => e.riskLevel !== "low").sort((a, b) => b.disengagementRiskScore - a.disengagementRiskScore);
 }
 
 /** Count-only aggregate (no names) — safe for CFO's rollup, unlike getAtRiskEmployees(). */
@@ -43,8 +41,8 @@ export function getAtRiskCount(user: CurrentUser | null): number {
   return getEmployeesForAggregation(user).filter(e => !e.optedOut && riskLevelFromScore(e.disengagementRiskScore) !== "low").length;
 }
 
-export function enrichEmployee(emp: Employee, user: CurrentUser | null): AtRiskEmployee {
-  const history = emp.optedOut ? [] : getNudgesForEmployee(emp.id, user);
+export async function enrichEmployee(emp: Employee, user: CurrentUser | null): Promise<AtRiskEmployee> {
+  const history = emp.optedOut ? [] : await getNudgesForEmployee(emp.id, user);
   return {
     ...emp,
     riskLevel: riskLevelFromScore(emp.disengagementRiskScore),
@@ -81,7 +79,12 @@ export function isEmployeeHighRisk(emp: Employee): boolean {
   return emp.disengagementRiskScore >= BURNOUT_HIGH_RISK_THRESHOLD;
 }
 
-export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentFlaggedHighRisk: boolean): NudgeEligibility {
+export function getNudgeEligibility(
+  emp: Employee,
+  history: Nudge[],
+  departmentFlaggedHighRisk: boolean,
+  now: Date
+): NudgeEligibility {
   const sorted = [...history].sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
 
   let consecutiveDismissals = 0;
@@ -98,7 +101,7 @@ export function getNudgeEligibility(emp: Employee, history: Nudge[], departmentF
 
   if (consecutiveDismissals >= FATIGUE_DISMISSAL_THRESHOLD) {
     const lastSent = sorted[0]?.sentDate;
-    const daysSinceLast = lastSent ? daysBetween(lastSent, getSimulatedDate()) : Infinity;
+    const daysSinceLast = lastSent ? daysBetween(lastSent, now) : Infinity;
     if (daysSinceLast < FATIGUE_COOLDOWN_DAYS) {
       return {
         eligible: false,
@@ -164,9 +167,10 @@ export async function generateNudgeForEmployee(employeeId: string, user: Current
     return { ok: false, error: "This employee has opted out — no nudges are generated for them." };
   }
 
-  const history = getNudgesForEmployee(target.id, user);
+  const history = await getNudgesForEmployee(target.id, user);
   const departmentFlagged = isDepartmentFlaggedHighRisk(target.departmentId);
-  const eligibility = getNudgeEligibility(target, history, departmentFlagged);
+  const now = await getSimulatedDate();
+  const eligibility = getNudgeEligibility(target, history, departmentFlagged, now);
   if (!eligibility.eligible) {
     return { ok: false, error: eligibility.reason };
   }
@@ -187,15 +191,20 @@ export async function generateNudgeForEmployee(employeeId: string, user: Current
   });
 
   const nudge: Nudge = {
-    id: nextNudgeId(),
+    id: await nextNudgeId(),
     employeeId: target.id,
     type: eligibility.recommendedType,
     content,
-    sentDate: getSimulatedDate().toISOString().slice(0, 10),
+    sentDate: now.toISOString().slice(0, 10),
     status: "sent",
     feedback: null,
   };
-  addNudge(nudge);
+
+  try {
+    await addNudge(nudge);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the nudge." };
+  }
 
   return { ok: true, nudge, explanation: explainNudge(nudge, target, eligibility, departmentFlagged) };
 }
@@ -261,10 +270,10 @@ export interface WeeklyNudgeEngagement {
   actedOn: number;
 }
 
-export function getNudgeEngagementTrend(user: CurrentUser | null, weeks = 8): WeeklyNudgeEngagement[] {
-  const nudges = getAllNudges(user);
+export async function getNudgeEngagementTrend(user: CurrentUser | null, weeks = 8): Promise<WeeklyNudgeEngagement[]> {
+  const nudges = await getAllNudges(user);
   const buckets = new Map<string, WeeklyNudgeEngagement>();
-  const today = getSimulatedDate();
+  const today = await getSimulatedDate();
 
   for (let w = weeks - 1; w >= 0; w--) {
     const weekStart = mondayOf(new Date(today.getTime() - w * 7 * 86400000));

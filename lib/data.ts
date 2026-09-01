@@ -1,6 +1,5 @@
 import "server-only";
-import fs from "node:fs";
-import path from "node:path";
+import { readState, writeState } from "@/lib/kv-store";
 import employeesSeed from "@/data/employees.json";
 import departmentsSeed from "@/data/departments.json";
 import wellnessProgramsSeed from "@/data/wellness-programs.json";
@@ -87,66 +86,65 @@ const store = {
   interventions: structuredClone(interventionsSeed) as Intervention[],
 };
 
-// Persisted to disk rather than kept in `store` above: Route Handlers, Server Actions,
-// and Server Components can end up on separate module instances of this file within the
-// same server process (confirmed for the sim clock and Subsystem C's interventions store —
-// same fix applied here). An in-memory array would let a sent nudge, a dismiss, or feedback
-// silently vanish depending on which module instance served the next read.
-const NUDGES_STATE_PATH = path.join(process.cwd(), "data", "nudges-state.json");
+// Persisted via lib/kv-store rather than kept in `store` above: Route Handlers, Server
+// Actions, and Server Components can end up on separate module instances of this file
+// within the same server process (confirmed for the sim clock and Subsystem C's
+// interventions store), and — on the actual Vercel deployment — the filesystem is
+// read-only outside /tmp, so a plain in-memory array or a raw fs write would either
+// silently desync between module instances or throw outright in production. An
+// in-memory array here would let a sent nudge, a dismiss, or feedback silently vanish
+// depending on which module instance served the next read.
+const NUDGES_KEY = "nudges";
+const NUDGES_FILE = "nudges-state.json";
 
-function readNudges(): Nudge[] {
-  try {
-    const raw = fs.readFileSync(NUDGES_STATE_PATH, "utf-8");
-    return JSON.parse(raw) as Nudge[];
-  } catch {
-    return structuredClone(nudgesSeed) as Nudge[];
-  }
+async function readNudges(): Promise<Nudge[]> {
+  return readState<Nudge[]>(NUDGES_KEY, NUDGES_FILE, structuredClone(nudgesSeed) as Nudge[]);
 }
 
-function writeNudges(list: Nudge[]): void {
-  fs.writeFileSync(NUDGES_STATE_PATH, JSON.stringify(list, null, 2) + "\n", "utf-8");
+async function writeNudges(list: Nudge[]): Promise<void> {
+  await writeState(NUDGES_KEY, NUDGES_FILE, list);
 }
 
 const SIMULATION_ANCHOR = new Date("2026-08-19T00:00:00Z");
 
-// Persisted to disk (not the in-memory `store` above) because Route Handlers and
-// Server Actions can end up on separate module instances of this file within the
-// same server process — an in-memory field silently desyncs between them (confirmed
-// in both `next dev` and a production `next build && next start`). Reading/writing a
-// file every call sidesteps that, at the cost of a real (small) disk I/O per call.
-const SIM_STATE_PATH = path.join(process.cwd(), "data", "sim-state.json");
+// Same persistence rationale as NUDGES_KEY above — this field must survive both the
+// module-instance split and, in production, Vercel's read-only filesystem.
+const SIM_STATE_KEY = "sim-week-offset";
+const SIM_STATE_FILE = "sim-state.json";
 
-function readSimWeekOffset(): number {
-  try {
-    const raw = fs.readFileSync(SIM_STATE_PATH, "utf-8");
-    const parsed = JSON.parse(raw) as { weekOffset?: number };
-    return typeof parsed.weekOffset === "number" ? parsed.weekOffset : 0;
-  } catch {
-    return 0;
-  }
+async function readSimWeekOffset(): Promise<number> {
+  const parsed = await readState<{ weekOffset?: number }>(SIM_STATE_KEY, SIM_STATE_FILE, { weekOffset: 0 });
+  return typeof parsed.weekOffset === "number" ? parsed.weekOffset : 0;
 }
 
-function writeSimWeekOffset(offset: number): void {
-  fs.writeFileSync(SIM_STATE_PATH, JSON.stringify({ weekOffset: offset }, null, 2) + "\n", "utf-8");
+async function writeSimWeekOffset(offset: number): Promise<void> {
+  await writeState(SIM_STATE_KEY, SIM_STATE_FILE, { weekOffset: offset });
 }
 
-export function getSimulatedDate(): Date {
+export async function getSimulatedDate(): Promise<Date> {
   const d = new Date(SIMULATION_ANCHOR);
-  d.setUTCDate(d.getUTCDate() + readSimWeekOffset() * 7);
+  d.setUTCDate(d.getUTCDate() + (await readSimWeekOffset()) * 7);
   return d;
 }
 
-export function getSimulatedDateISO(): string {
-  return getSimulatedDate().toISOString().slice(0, 10);
+export async function getSimulatedDateISO(): Promise<string> {
+  return (await getSimulatedDate()).toISOString().slice(0, 10);
 }
 
 /** Cross-cutting feature 6: visible only to HR Admin/CFO. */
-export function advanceSimulatedWeek(user: CurrentUser | null): { ok: boolean; date?: string; error?: string } {
+export async function advanceSimulatedWeek(
+  user: CurrentUser | null
+): Promise<{ ok: boolean; date?: string; error?: string; status?: number }> {
   if (!user || (user.role !== "hr_admin" && user.role !== "cfo")) {
-    return { ok: false, error: "Only HR Admin or CFO can advance the simulated clock." };
+    return { ok: false, error: "Only HR Admin or CFO can advance the simulated clock.", status: 403 };
   }
-  writeSimWeekOffset(readSimWeekOffset() + 1);
-  return { ok: true, date: getSimulatedDateISO() };
+  try {
+    await writeSimWeekOffset((await readSimWeekOffset()) + 1);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to advance the simulated clock.";
+    return { ok: false, error: message, status: 500 };
+  }
+  return { ok: true, date: await getSimulatedDateISO() };
 }
 
 function requireUser(user: CurrentUser | null): asserts user is CurrentUser {
@@ -267,7 +265,7 @@ export function getInterventions(user: CurrentUser | null): Intervention[] {
 
 // ---------- Nudges (Subsystem B) ----------
 
-export function getNudgesForEmployee(employeeId: string, user: CurrentUser | null): Nudge[] {
+export async function getNudgesForEmployee(employeeId: string, user: CurrentUser | null): Promise<Nudge[]> {
   requireUser(user);
   const emp = store.employees.find(e => e.id === employeeId);
   if (!emp || emp.optedOut) return [];
@@ -278,12 +276,13 @@ export function getNudgesForEmployee(employeeId: string, user: CurrentUser | nul
     (user.role === "employee" && user.employeeId === employeeId);
   if (!authorized) return [];
 
-  return readNudges().filter(n => n.employeeId === employeeId).sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
+  const nudges = await readNudges();
+  return nudges.filter(n => n.employeeId === employeeId).sort((a, b) => (a.sentDate < b.sentDate ? 1 : -1));
 }
 
-export function getAllNudges(user: CurrentUser | null): Nudge[] {
+export async function getAllNudges(user: CurrentUser | null): Promise<Nudge[]> {
   requireUser(user);
-  const nudges = readNudges();
+  const nudges = await readNudges();
   const optedOutIds = new Set(store.employees.filter(e => e.optedOut).map(e => e.id));
   if (user.role === "hr_admin") {
     return nudges.filter(n => !optedOutIds.has(n.employeeId));
@@ -295,52 +294,62 @@ export function getAllNudges(user: CurrentUser | null): Nudge[] {
   return [];
 }
 
-export function getNudgeById(id: string): Nudge | null {
-  return readNudges().find(n => n.id === id) ?? null;
+export async function getNudgeById(id: string): Promise<Nudge | null> {
+  const nudges = await readNudges();
+  return nudges.find(n => n.id === id) ?? null;
 }
 
-export function updateNudgeStatus(
+export async function updateNudgeStatus(
   nudgeId: string,
   status: Nudge["status"],
   user: CurrentUser | null
-): { ok: boolean; error?: string } {
+): Promise<{ ok: boolean; error?: string }> {
   requireUser(user);
-  const list = readNudges();
+  const list = await readNudges();
   const nudge = list.find(n => n.id === nudgeId);
   if (!nudge) return { ok: false, error: "Nudge not found." };
   if (user.role !== "employee" || user.employeeId !== nudge.employeeId) {
     return { ok: false, error: "Only the recipient can act on this nudge." };
   }
   nudge.status = status;
-  writeNudges(list);
+  try {
+    await writeNudges(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the nudge update." };
+  }
   return { ok: true };
 }
 
-export function submitNudgeFeedback(
+export async function submitNudgeFeedback(
   nudgeId: string,
   feedback: Nudge["feedback"],
   user: CurrentUser | null
-): { ok: boolean; error?: string } {
+): Promise<{ ok: boolean; error?: string }> {
   requireUser(user);
-  const list = readNudges();
+  const list = await readNudges();
   const nudge = list.find(n => n.id === nudgeId);
   if (!nudge) return { ok: false, error: "Nudge not found." };
   if (user.role !== "employee" || user.employeeId !== nudge.employeeId) {
     return { ok: false, error: "Only the recipient can give feedback on this nudge." };
   }
   nudge.feedback = feedback;
-  writeNudges(list);
+  try {
+    await writeNudges(list);
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Failed to save the nudge feedback." };
+  }
   return { ok: true };
 }
 
-export function addNudge(nudge: Nudge): void {
-  const list = readNudges();
+export async function addNudge(nudge: Nudge): Promise<void> {
+  const list = await readNudges();
   list.unshift(nudge);
-  writeNudges(list);
+  await writeNudges(list); // throws on failure — callers must catch and surface this, not swallow it
 }
 
-export function nextNudgeId(): string {
-  const max = readNudges().reduce((m, n) => {
+export async function nextNudgeId(): Promise<string> {
+  const list = await readNudges();
+  const max = list.reduce((m, n) => {
     const num = Number(n.id.replace("NUDGE-", ""));
     return Number.isFinite(num) ? Math.max(m, num) : m;
   }, 0);

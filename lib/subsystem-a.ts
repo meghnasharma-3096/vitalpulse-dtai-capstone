@@ -87,19 +87,20 @@ function getProgramStatus(program: WellnessProgram): ProgramStatus {
   return "available";
 }
 
-function isRecentHire(employee: Employee): boolean {
+function isRecentHire(employee: Employee, now: Date): boolean {
   const hireDate = new Date(employee.hireDate);
   // Anchor to the app's simulated clock (lib/data.ts), not real wall-clock
   // time — otherwise this silently drifts out of range as real time passes,
-  // independent of the "Advance to next week" demo control.
-  const now = getSimulatedDate();
+  // independent of the "Advance to next week" demo control. Callers resolve
+  // `now` once via `await getSimulatedDate()` rather than this helper doing
+  // it per-employee, since getSimulatedDate() is an async KV/file read.
   const diffMs = now.getTime() - hireDate.getTime();
   const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
   return diffMonths <= COLD_START_MONTHS;
 }
 
-function isColdStart(employee: Employee): boolean {
-  return employee.personaTag === "standard" && isRecentHire(employee);
+function isColdStart(employee: Employee, now: Date): boolean {
+  return employee.personaTag === "standard" && isRecentHire(employee, now);
 }
 
 // ---------- Core matching logic ----------
@@ -205,7 +206,7 @@ export async function getRecommendationsForEmployee(
   const rawPrograms = getWellnessPrograms(user) as WellnessProgramExtended[];
 
   // Rank programs based on persona or cold-start fallback
-  const coldStart = isColdStart(employee);
+  const coldStart = isColdStart(employee, await getSimulatedDate());
   const ranked = coldStart
     ? rankProgramsColdStart(rawPrograms)
     : rankPrograms(employee, rawPrograms);
@@ -269,7 +270,7 @@ export function getProgramCatalogWithUtilization(
  * schema has no per-employee enrollment records to filter by department, so
  * there is no honest per-department version of those two fields to show.
  */
-export function getProgramCatalogForDepartment(user: CurrentUser | null): ProgramWithUtilization[] {
+export async function getProgramCatalogForDepartment(user: CurrentUser | null): Promise<ProgramWithUtilization[]> {
   const rawPrograms = getWellnessPrograms(user) as WellnessProgramExtended[];
   if (!user || user.role !== "dept_manager") {
     // Not a dept manager: no department to scope to, fall back to the
@@ -279,6 +280,7 @@ export function getProgramCatalogForDepartment(user: CurrentUser | null): Progra
 
   const deptEmployees = getEmployeesForAggregation(user).filter(e => !e.optedOut);
   const deptRecommendedCount = new Map<string, number>();
+  const now = await getSimulatedDate();
 
   for (const emp of deptEmployees) {
     // Mirror generateProgramRecommendation's conflict rule (no LLM call needed
@@ -286,7 +288,7 @@ export function getProgramCatalogForDepartment(user: CurrentUser | null): Progra
     if (emp.disengagementRiskScore >= DISENGAGEMENT_HIGH_THRESHOLD) continue;
     if (isDepartmentFlaggedHighRisk(emp.departmentId)) continue;
 
-    const ranked = isColdStart(emp) ? rankProgramsColdStart(rawPrograms) : rankPrograms(emp, rawPrograms);
+    const ranked = isColdStart(emp, now) ? rankProgramsColdStart(rawPrograms) : rankPrograms(emp, rawPrograms);
     for (const program of ranked.slice(0, 3)) {
       deptRecommendedCount.set(program.id, (deptRecommendedCount.get(program.id) ?? 0) + 1);
     }

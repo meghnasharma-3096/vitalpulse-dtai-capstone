@@ -16,7 +16,7 @@ export default async function CfoDashboardPage() {
 
   const comparison = getAiVsWithoutComparison(user);
   const distribution = getDisengagementDistribution(user);
-  const trend = getNudgeEngagementTrend(user);
+  const trend = await getNudgeEngagementTrend(user);
 
   return (
     <div className="space-y-6">

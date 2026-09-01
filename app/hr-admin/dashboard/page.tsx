@@ -15,7 +15,7 @@ export default async function HrAdminDashboardPage() {
   }
 
   const departments = getDepartments(user);
-  const atRisk = getAtRiskEmployees(user);
+  const atRisk = await getAtRiskEmployees(user);
   const distribution = getDisengagementDistribution(user);
   const interventions = getInterventions(user);
   const pendingInterventions = interventions.filter(i => i.status === "pending" || i.status === "escalated").length;

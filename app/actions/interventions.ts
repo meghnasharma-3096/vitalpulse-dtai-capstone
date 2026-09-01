@@ -12,7 +12,7 @@ import {
 
 export async function approveInterventionAction(interventionId: string) {
   const user = await getCurrentUser();
-  const result = approveIntervention(interventionId, user);
+  const result = await approveIntervention(interventionId, user);
   revalidatePath("/hr-admin/burnout-radar");
   revalidatePath("/dept-manager/dashboard");
   revalidatePath("/cfo/dashboard");
@@ -21,7 +21,7 @@ export async function approveInterventionAction(interventionId: string) {
 
 export async function rejectInterventionAction(interventionId: string) {
   const user = await getCurrentUser();
-  const result = rejectIntervention(interventionId, user);
+  const result = await rejectIntervention(interventionId, user);
   revalidatePath("/hr-admin/burnout-radar");
   revalidatePath("/dept-manager/dashboard");
   revalidatePath("/cfo/dashboard");
@@ -30,7 +30,7 @@ export async function rejectInterventionAction(interventionId: string) {
 
 export async function escalateInterventionAction(interventionId: string, reason: string) {
   const user = await getCurrentUser();
-  const result = escalateIntervention(interventionId, reason, user);
+  const result = await escalateIntervention(interventionId, reason, user);
   revalidatePath("/hr-admin/burnout-radar");
   revalidatePath("/dept-manager/dashboard");
   revalidatePath("/cfo/dashboard");
@@ -48,10 +48,10 @@ export async function draftInterventionAction(departmentId: string) {
 
 export async function checkAutoEscalationsAction() {
   const user = await getCurrentUser();
-  const count = checkAutoEscalations(user);
-  if (count > 0) {
+  const result = await checkAutoEscalations(user);
+  if (result.escalatedCount > 0) {
     revalidatePath("/hr-admin/burnout-radar");
     revalidatePath("/cfo/dashboard");
   }
-  return { ok: true, escalatedCount: count };
+  return result;
 }

@@ -37,7 +37,7 @@ export default async function EmployeeDashboardPage() {
     );
   }
 
-  const nudges = getNudgesForEmployee(employee.id, user);
+  const nudges = await getNudgesForEmployee(employee.id, user);
   const departmentFlagged = isDepartmentFlaggedHighRisk(employee.departmentId);
   const riskLevel = riskLevelFromScore(employee.disengagementRiskScore);
   const recommendationResult = await getRecommendationsForEmployee(employee, user);

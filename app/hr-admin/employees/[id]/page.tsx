@@ -18,7 +18,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
   const department = getDepartmentById(employee.departmentId, user);
   const departmentFlagged = isDepartmentFlaggedHighRisk(employee.departmentId);
   const latestSnapshot = getLatestBurnoutSnapshotForDepartment(employee.departmentId, user);
-  const nudges = employee.optedOut ? [] : getNudgesForEmployee(employee.id, user);
+  const nudges = employee.optedOut ? [] : await getNudgesForEmployee(employee.id, user);
   const programMatches = await getProgramMatchesForProfile(employee, user);
 
   return (
